@@ -5,6 +5,7 @@ Trabajo Práctico Individual de Desarrollo con Inteligencia Artificial - 2C 2026
 
 > **Sobre este proyecto:** es el trabajo práctico de Desarrollo de Software. En su origen es una **aplicación móvil** (React Native + Expo) con un backend en Node. Esta versión la **adapta a página web**: es la misma aplicación y el mismo backend, que ahora también se abren en el navegador con un diseño pensado para pantalla de computadora (barra de navegación arriba, pantallas en columnas, direcciones propias para cada pantalla). En el celular la app se ve igual que antes.
 
+Link: https://ai-ticket-it-web-ten.vercel.app
 ---
 
 ## Índice
