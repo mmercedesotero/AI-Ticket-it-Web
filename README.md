@@ -3,6 +3,8 @@
 Trabajo Práctico Individual de Desarrollo con Inteligencia Artificial - 2C 2026
 **UTN BA - Cátedra Desarrollo de Software** - Otero María Mercedes
 
+> **Sobre este proyecto:** es el trabajo práctico de Desarrollo de Software. En su origen es una **aplicación móvil** (React Native + Expo) con un backend en Node. Esta versión la **adapta a página web**: es la misma aplicación y el mismo backend, que ahora también se abren en el navegador con un diseño pensado para pantalla de computadora (barra de navegación arriba, pantallas en columnas, direcciones propias para cada pantalla). En el celular la app se ve igual que antes.
+
 ---
 
 ## Índice
@@ -25,12 +27,12 @@ Trabajo Práctico Individual de Desarrollo con Inteligencia Artificial - 2C 2026
 
 ## 1. De qué trata el proyecto
 
-**AI Ticket It** es una aplicación móvil para publicar eventos y vender entradas. Tiene dos tipos de cuenta:
+**AI Ticket It** es una aplicación para publicar eventos y vender entradas. Nació como **app móvil** y está **adaptada también a página web**: se usa desde el celular (con Expo Go) o desde el navegador de la computadora. Tiene dos tipos de cuenta:
 
 - **Comprador:** explora eventos, guarda favoritos, compra (o reserva) entradas, paga con tarjeta, sigue el estado de sus compras, chatea con el organizador, descarga el comprobante en PDF y deja reseñas de los eventos a los que fue.
 - **Organizador:** crea eventos con sus tipos de entrada y su portada, ve cuánto vende cada uno, quiénes compraron, recibe avisos (mañana es tu evento, se están agotando las entradas, etc.) y responde a los compradores.
 
-La aplicación se ejecuta de forma local: el **backend** corre en la computadora y la **app** se abre en el celular con Expo Go.
+Se puede ejecutar de forma local —el **backend** corre en la computadora y la app se abre en el celular con Expo Go, o la web en el navegador— o **publicarla** en internet (ver [Versión web](#paso-2-levantar-la-web) y [Publicarla gratis](#publicarla-gratis-web-en-vercel--backend-en-render)).
 
 ---
 
@@ -71,7 +73,10 @@ La aplicación se ejecuta de forma local: el **backend** corre en la computadora
 | Back-End | Node.js + Express 5 |
 | Tests | Ejecutor de tests de Node (`node:test`) y `fetch`, sin librerías extra |
 | Autenticación | JWT (`jsonwebtoken`) y contraseñas con hash `scrypt` (módulo `crypto` de Node) |
-| Front-End | React Native con Expo (SDK 58) |
+| Front-End | React Native con Expo (SDK 58): un solo código para el celular y la web |
+| Versión web | `react-native-web` (Expo para web): el mismo código se muestra en el navegador, con pantallas de escritorio propias (archivos `*Web.js`) |
+| Tipografía (web) | Inter, hasta seminegrita (Google Fonts) |
+| Publicación | Web en Vercel y backend en Render (gratis), o todo junto en Railway |
 | Navegación | React Navigation (stack + tabs inferiores) |
 | Íconos | `@expo/vector-icons` (Ionicons) |
 | QR | `react-native-qrcode-svg` |
@@ -88,6 +93,10 @@ El repositorio es un **monorepo**: una sola carpeta con el backend y el frontend
 ```
 AI-Ticket-It/
 ├── README.md
+├── package.json             comandos para publicar (build de la web y arranque del servidor)
+├── vercel.json              publicar la web en Vercel
+├── render.yaml              publicar el backend en Render
+├── railway.json             publicar todo en un solo servicio (Railway)
 └── packages/
     ├── backend/                 API REST (Node + Express)
     │   ├── package.json
@@ -107,15 +116,17 @@ AI-Ticket-It/
     │       ├── errors/          errores propios (400, 401, 403, 404)
     │       └── utils/           contraseñas, tokens, imágenes, reservas
     │
-    └── frontend/                app móvil (React Native + Expo)
+    └── frontend/                app móvil y web (React Native + Expo)
         ├── package.json
-        ├── App.js               navegación y proveedores
+        ├── App.js               navegación, sesión y proveedores
         ├── app.json             configuración de Expo
+        ├── public/              página base de la web (pantalla de carga) e ícono de la pestaña
         ├── img/                 fotos de los eventos de prueba
         └── src/
-            ├── api.js           ⚠ acá se pone la IP del backend (ver "Paso 2")
+            ├── api.js           dirección del backend (la web la detecta sola; el celular usa EXPO_PUBLIC_API_URL)
             ├── tema.js          colores y medidas de toda la app
-            ├── screens/         una pantalla por archivo
+            ├── web.js           ayudas de la versión web (detecta pantalla de escritorio, ícono, tipografía)
+            ├── screens/         una pantalla por archivo; las que tienen versión de escritorio suman un archivo *Web.js (EventosWeb, MensajesWeb...)
             ├── componentes/     piezas reutilizables (tarjetas, chips, avisos...)
             └── ...              estado global (sesión, eventos, notificaciones) y utilidades
 ```
@@ -128,8 +139,8 @@ El backend está organizado en capas: **ruta → controlador → servicio → re
 
 ### Requisitos
 - **Node.js** 18 o superior (se desarrolló con Node 24) y **npm**.
-- La app **Expo Go** instalada en el celular (Android o iPhone).
-- La computadora y el celular tienen que estar **en la misma red wifi**.
+- Un navegador (Chrome, Edge, Firefox...).
+- Opcional, solo para usarla en el celular: la app **Expo Go**.
 
 ### Paso 1: levantar el backend
 
@@ -141,91 +152,67 @@ npm run dev
 
 Con `npm run dev` el servidor se reinicia solo al guardar un archivo (usa nodemon). Para correrlo normal: `npm start`.
 
-Cuando funciona, la consola muestra `Servidor funcionando` y la API queda en `http://localhost:3000`. Además te dice qué IP poner en la app (ver el Paso 2). Al arrancar se cargan los [datos de prueba](#6-cuentas-de-prueba).
+Cuando funciona, la consola muestra `Servidor funcionando` y la API queda en `http://localhost:3000`. Al arrancar se cargan los [datos de prueba](#6-cuentas-de-prueba).
 
-### Paso 2: poner la IP del backend en la app ⚠
-
-Este paso es **obligatorio**: sin él la app no puede hablar con el backend y al intentar ingresar muestra el aviso *"Falta configurar la IP del backend"*.
-
-El celular **no puede** usar `localhost` para llegar al backend: `localhost` sería el propio celular. Tiene que usar la **IP de tu computadora en la red wifi**. Quien clone el proyecto desde `main` tiene que poner **su propia IP**:
-
-1. **Averiguá tu IP.** La forma más fácil: al levantar el backend (Paso 1), la terminal te muestra la línea exacta para pegar:
-
-   ```
-   Para usar la app en el celular, abrí packages/frontend/src/api.js y poné esta dirección:
-
-       const API_CELULAR = "http://192.168.1.35:3000";
-   ```
-
-   También se puede ver a mano: en **Windows**, `ipconfig` y buscá "Dirección IPv4" del adaptador de wifi; en **Mac / Linux**, `ifconfig` o `ip addr`.
-
-2. **Abrí [`packages/frontend/src/api.js`](packages/frontend/src/api.js)** y reemplazá `TU-IP-AQUI` por esa IP:
-
-   ```js
-   const API_CELULAR = "http://192.168.1.35:3000";   // antes: "http://TU-IP-AQUI:3000"
-   ```
-
-3. Guardá el archivo. La computadora y el celular tienen que estar **en la misma wifi**.
-
-Si tu IP cambia (por ejemplo al conectarte a otra red), hay que volver a cambiarla.
-
-### Paso 3: levantar la app
+### Paso 2: levantar la web
 
 En **otra terminal**:
 
 ```bash
 cd packages/frontend
 npm install
-npx expo start -c
-```
-
-El `-c` limpia el caché, conviene usarlo la primera vez o cuando algo se vea raro. Aparece un código QR en la terminal: escanealo con **Expo Go** (en Android) o con la cámara (en iPhone).
-
-### Versión web
-
-La misma app corre en el navegador, con un diseño de escritorio (barra de navegación arriba, pantallas en columnas, calendario y mensajes a pantalla ancha). En pantallas angostas conserva el diseño del celular.
-
-**En desarrollo** (con el backend levantado, Paso 1):
-
-```bash
-cd packages/frontend
 npm run web
 ```
 
-Se abre en `http://localhost:8081`. **No hace falta configurar ninguna IP**: la web busca el backend en el puerto 3000 de la misma computadora.
+Se abre en `http://localhost:8081`. **No hace falta configurar ninguna IP ni ninguna dirección**: la web busca el backend en el puerto 3000 de la misma computadora. Ingresá con alguna de las [cuentas de prueba](#6-cuentas-de-prueba).
 
-La sesión queda guardada en el navegador (recargar la página no cierra la sesión) y las pantallas tienen dirección propia (`/explorar`, `/evento/12`, `/mis-compras`, `/mensajes`...), así que se pueden compartir y funciona el botón "atrás" del navegador.
+La web tiene un diseño de escritorio (barra de navegación arriba, pantallas en columnas) y en ventanas angostas conserva el diseño del celular. La sesión queda guardada en el navegador (recargar la página no cierra la sesión) y cada pantalla tiene su propia dirección (`/explorar`, `/evento/12`, `/mis-compras`, `/mensajes`...), así que se pueden compartir y funciona el botón "atrás".
+
+### Usarla en el celular (opcional)
+
+El celular **no puede** usar `localhost`: tiene que llegar al backend por la IP de la computadora, o por la dirección donde esté publicado. Para eso se crea el archivo `packages/frontend/.env` con **una** línea (el backend muestra la línea exacta al arrancar):
+
+```
+EXPO_PUBLIC_API_URL=http://192.168.1.35:3000
+```
+
+o, si ya publicaste el backend (ver más abajo):
+
+```
+EXPO_PUBLIC_API_URL=https://ai-ticket-it-api.onrender.com
+```
+
+Después, en `packages/frontend`, ejecutá `npx expo start -c`, y escaneá el código QR con **Expo Go** (Android) o con la cámara (iPhone). Con la IP de la computadora, el celular y la computadora tienen que estar en la misma wifi.
 
 ### Publicarla gratis: web en Vercel + backend en Render
 
-El backend guarda todo en memoria y necesita un servidor que esté siempre encendido, así que **no puede ir a Vercel** (Vercel es "serverless": cada pedido puede caer en una copia distinta y se perderían las cuentas y compras). Por eso se publica en dos partes:
+El backend guarda todo en memoria y necesita un servidor que esté siempre encendido, así que **no puede ir a Vercel** (Vercel es "serverless": cada pedido puede caer en una copia distinta y se perderían las cuentas y compras). Por eso se publica en dos partes: el **backend en Render** y la **web en Vercel**. Primero Render, porque la web necesita su dirección.
 
-1. **Backend en [Render](https://render.com)** (plan gratuito): crear un **Web Service** desde el repositorio de GitHub. Render lee [`render.yaml`](render.yaml) (carpeta `packages/backend`, `npm install`, `npm start`). Al terminar, copiar la dirección que le da, por ejemplo `https://ai-ticket-it-api.onrender.com`.
-2. **Web en [Vercel](https://vercel.com)**: importar el mismo repositorio. Vercel lee [`vercel.json`](vercel.json) (genera la web y la publica). Antes de desplegar, en **Settings → Environment Variables** agregar:
+**1. Backend en [Render](https://render.com)** (plan gratuito):
+
+1. Registrarse, conectar GitHub y elegir **New → Blueprint** con este repositorio. Render lee [`render.yaml`](render.yaml) (carpeta `packages/backend`, `npm install`, `npm start`, plan gratuito y un `JWT_SECRET` generado solo).
+2. Si el Blueprint pide una tarjeta, usar **New → Web Service** y completar a mano: Root Directory `packages/backend`, Build Command `npm install`, Start Command `npm start` e Instance Type **Free**.
+3. Cuando diga **Live**, copiar la dirección (por ejemplo `https://ai-ticket-it-api.onrender.com`) y probarla agregando `/categorias`: tiene que mostrar una lista de categorías.
+
+**2. Web en [Vercel](https://vercel.com):**
+
+1. Registrarse con GitHub y elegir **Add New → Project** con el mismo repositorio, dejando **Root Directory** vacío. Vercel lee [`vercel.json`](vercel.json): genera la web (`expo export`) y la publica.
+2. Antes de **Deploy**, en **Environment Variables** agregar:
 
    ```
    EXPO_PUBLIC_API_URL = https://ai-ticket-it-api.onrender.com
    ```
 
    (la dirección del backend, **sin** barra al final). Si se cambia esta variable, hay que volver a desplegar la web.
+3. Al terminar, Vercel da la dirección pública de la web.
 
-Cosas a tener en cuenta del plan gratuito de Render: el servicio se **duerme** tras un rato sin visitas y la primera consulta después tarda cerca de un minuto en despertarlo; y al dormirse o reiniciarse **se pierden las cuentas y compras nuevas** (vuelven los datos de prueba). Para uso real habría que agregar una base de datos.
+Cosas a tener en cuenta del plan gratuito de Render: el servicio se **duerme** tras un rato sin visitas y la primera consulta después tarda cerca de un minuto en despertarlo (las pantallas muestran una rueda de carga y un aviso); y al dormirse o reiniciarse **se pierden las cuentas y compras nuevas** (vuelven los datos de prueba). Para uso real habría que agregar una base de datos.
 
-### Publicarla en Railway (un solo servicio)
+### Alternativa: todo en un solo servicio (Railway)
 
-El backend publica la web y la API desde el mismo servidor (la API queda también bajo `/api`), así que se publica **un solo servicio**:
+El backend también puede publicar la web: la sirve desde `packages/frontend/dist` y deja la API disponible bajo `/api`. Con [Railway](https://railway.com) alcanza con crear un proyecto desde el repositorio (**Deploy from GitHub repo**): lee [`railway.json`](railway.json), instala, genera la web (`npm run build`) y arranca (`npm start`). Después, **Settings → Networking → Generate Domain** y, recomendado, la variable `JWT_SECRET`. Railway no es gratuito de forma permanente.
 
-1. Subir el proyecto a GitHub y, en [Railway](https://railway.com), crear un proyecto nuevo con **Deploy from GitHub repo**.
-2. Railway lee [`railway.json`](railway.json): instala las dependencias, genera la web (`npm run build`, que ejecuta `expo export` y deja el resultado en `packages/frontend/dist`) y arranca el servidor (`npm start`). No hace falta configurar comandos a mano.
-3. En la pestaña **Settings → Networking** del servicio, tocar **Generate Domain** para obtener la dirección pública (HTTPS incluido).
-4. Recomendado: en **Variables** agregar `JWT_SECRET` con un texto largo y propio, para que no se use el secreto de desarrollo.
-
-Cosas a tener en cuenta:
-
-- El puerto lo da Railway en la variable `PORT` (el servidor ya la usa).
-- Los datos siguen en memoria: cada vez que Railway reinicia o vuelve a desplegar el servicio, vuelven los datos de prueba y se pierden las cuentas y compras nuevas. Para uso real habría que agregar una base de datos.
-- Las fotos de perfil y de portada se guardan en memoria, así que también se pierden al reiniciar.
-- Para probar el resultado publicado en la propia computadora: `npm run build` en la raíz y después `npm start`, y abrir `http://localhost:3000`.
+Para probar el resultado "todo junto" en la propia computadora: `npm run build` en la raíz, después `npm start` y abrir `http://localhost:3000`.
 
 ### Correr los tests del backend
 
@@ -287,10 +274,12 @@ npx newman run packages/backend/postman/AI-Ticket-It.postman_collection.json
 
 | Problema | Qué probar |
 |----------|-----------|
-| La app dice "Falta configurar la IP del backend" | No se hizo el Paso 2: cambiá `TU-IP-AQUI` por tu IP en `packages/frontend/src/api.js`. |
-| La app dice "Network request failed" o no carga nada | Revisá que el backend esté corriendo (`npm start` en `packages/backend`), que la IP de `api.js` sea la que muestra el backend al arrancar y que la compu y el celular estén en la misma wifi. |
+| La web no carga datos o no deja ingresar | Revisá que el backend esté corriendo (Paso 1). En la web publicada, revisá que la variable `EXPO_PUBLIC_API_URL` de Vercel tenga la dirección de Render, sin barra al final, y que hayas vuelto a desplegar. |
+| La web publicada tarda mucho en cargar la primera vez | Es el plan gratuito de Render: el servidor estaba dormido y tarda cerca de un minuto en despertar. |
+| En el celular dice "Falta configurar la dirección del backend" | No se creó el archivo `packages/frontend/.env` (ver "Usarla en el celular"). |
+| En el celular dice "Network request failed" | Revisá que el backend esté corriendo, que la dirección del `.env` sea la que muestra el backend al arrancar y que la compu y el celular estén en la misma wifi. |
 | Sigue sin conectar | El firewall de Windows puede estar bloqueando el puerto 3000. Permití a Node.js en redes privadas. |
-| Los cambios no se ven | Cerrá Expo Go y volvé a abrirlo, o ejecutá `npx expo start -c`. |
+| Los cambios no se ven | Recargá la página, o en el celular cerrá Expo Go y ejecutá `npx expo start -c`. |
 | Se perdieron las cuentas o eventos que creaste | Es normal: los datos están en memoria y se reinician con el servidor. Ver [limitaciones](#11-limitaciones-conocidas). |
 | La instalación de paquetes es muy lenta | Si el proyecto está en una carpeta sincronizada (OneDrive), pausá la sincronización mientras se instala. |
 
@@ -321,6 +310,22 @@ También se puede crear una cuenta nueva desde la pantalla de registro.
 ---
 
 ## 7. Pantallas de la app
+
+Las pantallas son las mismas en el celular y en la web. Lo que cambia es **cómo se acomodan**:
+
+| | Celular (y ventanas angostas) | Web de escritorio (desde 900 px de ancho) |
+|---|---|---|
+| Navegación | Pestañas abajo | Barra superior con Explorar, Mis compras, Calendario y Mensajes, buscador, campana y foto |
+| Ingreso y registro | Formulario | Pantalla dividida: marca a la izquierda, formulario a la derecha |
+| Explorar | Lista de eventos | Buscador con filtros arriba, carrusel de favoritos y grilla de eventos |
+| Evento | Pantalla con botón "Elegir entradas" | Dos columnas: información a la izquierda y panel fijo para elegir entradas y pagar |
+| Mis compras | Entradas en lista | Entradas con forma de ticket en dos columnas |
+| Entrada | Ticket con QR | Evento y datos de la compra a la izquierda, entrada digital con QR a la derecha |
+| Mensajes | Lista y chat en pantallas separadas | Bandeja con la lista a la izquierda y el chat a la derecha |
+| Perfil | Lista de opciones | Menú de la cuenta a la izquierda y formulario de datos a la derecha |
+| Organizador | Panel en tarjetas | Indicadores arriba y tabla con todos sus eventos |
+
+Además, en la web cada pantalla tiene su propia dirección (por ejemplo `/explorar`, `/evento/12` o `/mis-compras`) y la sesión se mantiene al recargar la página.
 
 ### Antes de ingresar
 | Pantalla | Qué hace |
@@ -434,7 +439,7 @@ Todos los colores y medidas están en un solo archivo, [`packages/frontend/src/t
 | Coral suave (`acentoSuave`) | `#FDEEEA` | Fondos de elementos destacados |
 | Verde (`exito`) | `#148C5E` | Confirmaciones: pago aprobado, "Confirmada" |
 | Rojo (`error`) | `#DC2626` | Errores y acciones destructivas |
-| Fondo | `#E9EEF5` | Fondo de las pantallas (más oscuro que las tarjetas para que se note su forma) |
+| Fondo | `#E9EEF5` (celular) / `#F4F6FA` (web) | Fondo de las pantallas (más oscuro que las tarjetas para que se note su forma) |
 | Blanco | `#FFFFFF` | Tarjetas y campos |
 | Borde | `#E2E8F0` | Líneas y bordes finos |
 | Gris | `#64748B` / `#94A3B8` | Textos secundarios y de ayuda |
@@ -445,6 +450,7 @@ Todos los colores y medidas están en un solo archivo, [`packages/frontend/src/t
 - Los avisos y confirmaciones aparecen como hojas desde abajo, en lugar de las alertas del sistema.
 - Títulos centrados y una animación de "tirar para refrescar" igual en todas las pantallas.
 - Al tocar otra vez el ícono de la pestaña en la que ya estás, la lista vuelve al principio (como en las apps de iPhone).
+- **Web:** tipografía Inter en peso liviano, avisos como ventanas centradas (en el celular suben desde abajo), una pantalla de carga con el logo mientras se descarga la app y la misma identidad (colores, tickets con muescas, botones coral).
 
 ---
 
@@ -452,8 +458,10 @@ Todos los colores y medidas están en un solo archivo, [`packages/frontend/src/t
 
 Esta es una aplicación de práctica y algunas cosas están simplificadas a propósito:
 
-- **Persistencia en memoria:** todo lo que se crea (cuentas, eventos, compras, tarjetas, fotos, reseñas) vive en la memoria del servidor y **se pierde al reiniciarlo**, volviendo a los datos de prueba. Con `npm run dev` el servidor se reinicia cada vez que se guarda un archivo del backend. La app tampoco recuerda la sesión: al cerrarla hay que volver a ingresar.
-- **IP configurada a mano:** la dirección del backend se cambia manualmente en `api.js` (el backend muestra al arrancar la línea que hay que pegar).
+- **Persistencia en memoria:** todo lo que se crea (cuentas, eventos, compras, tarjetas, fotos, reseñas) vive en la memoria del servidor y **se pierde al reiniciarlo**, volviendo a los datos de prueba. Con `npm run dev` el servidor se reinicia cada vez que se guarda un archivo del backend. En el celular la app tampoco recuerda la sesión: al cerrarla hay que volver a ingresar (en la web la sesión sí queda guardada en el navegador).
+- **Dirección del backend en el celular:** el celular necesita que se le indique dónde está el backend (archivo `.env`). La web no necesita configurar nada.
+- **Publicación gratuita:** en el plan gratuito de Render el servidor se duerme tras un rato sin visitas (la primera consulta tarda cerca de un minuto) y, al reiniciarse, vuelven los datos de prueba.
+- **Web sin gráfico de ventas:** el panel del organizador muestra indicadores y una tabla, pero no un gráfico de evolución de ventas, porque la app no guarda las ventas por fecha.
 - **Pagos simulados:** no hay una pasarela de pago real.
 - **QR decorativo:** el código QR de la entrada se genera con los datos de la compra, pero no hay una pantalla para escanearlo y validarlo en el acceso.
 - **Recuperación de contraseña sin email:** el código se muestra en pantalla.
