@@ -67,7 +67,7 @@ const opcionesTab = ({ route }, insets) => ({
 const ANCHO_PESTANA = { Eventos: undefined, "Mis eventos": 1180, "Mis compras": 1120, Calendario: 1180, Notificaciones: 900, Perfil: 1120 };
 const ANCHO_PANTALLA = {
   Detalle: 1180, Entradas: 1000, Pagar: 760, Chat: 1180, Mensajes: 1180, ComprasEvento: 1000, CrearEvento: 1180,
-  Terminos: 1000, Ayuda: undefined, Favoritos: 1120, Tarjetas: 760, AgregarTarjeta: 760, EditarPerfil: 900, Entrada: 960, Resena: 760,
+  Terminos: 1000, Ayuda: undefined, Favoritos: 1120, Tarjetas: 760, AgregarTarjeta: 760, EditarPerfil: 900, Entrada: 1180, Resena: 760,
 };
 
 // En el celular las pantallas se muestran tal cual. En la web de escritorio se centran en una columna.
