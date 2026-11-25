@@ -14,6 +14,10 @@ const ESTILO_GLOBAL = `
     font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   }
   body { -webkit-font-smoothing: antialiased; }
+  /* iPhone: si un campo de texto tiene letra menor a 16 px, Safari agranda la pantalla al tocarlo y la deja desacomodada. */
+  @media (max-width: 899px) {
+    #root input, #root textarea, #root select { font-size: 16px !important; }
+  }
 `;
 
 if (esWeb && typeof document !== "undefined") {
