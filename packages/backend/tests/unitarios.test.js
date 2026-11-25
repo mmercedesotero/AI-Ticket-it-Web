@@ -229,11 +229,11 @@ describe("Aviso de arranque con la IP", () => {
     assert.equal(lista[1].esWifi, false);
   });
 
-  test("el mensaje muestra la línea exacta que hay que pegar en la app y las otras direcciones", () => {
+  test("el mensaje muestra la línea exacta que hay que poner en el .env de la app y las otras direcciones", () => {
     const mensaje = mensajeDeArranque(3000, direccionesLocales(interfaces));
     assert.ok(mensaje.includes("Servidor funcionando en http://localhost:3000"));
-    assert.ok(mensaje.includes('const API_CELULAR = "http://192.168.2.104:3000";'));
-    assert.ok(mensaje.includes("packages/frontend/src/api.js"));
+    assert.ok(mensaje.includes("EXPO_PUBLIC_API_URL=http://192.168.2.104:3000"));
+    assert.ok(mensaje.includes("packages/frontend/.env"));
     assert.ok(mensaje.includes("http://192.168.56.1:3000"));
   });
 

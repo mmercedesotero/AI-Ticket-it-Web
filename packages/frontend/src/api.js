@@ -1,13 +1,15 @@
 import { Platform } from "react-native";
 
-// ⚠ SOLO PARA EL CELULAR: cambiá TU-IP-AQUI por la IP de tu computadora en la red wifi.
+// Dirección del backend. Se puede fijar con la variable EXPO_PUBLIC_API_URL (por ejemplo en el archivo
+// packages/frontend/.env), tanto para el celular como para la web:
 //
-// Cuando levantás el backend (npm start en packages/backend), la terminal te muestra la línea exacta para pegar acá.
-// También se puede ver con "ipconfig" (Windows) o "ifconfig" (Mac / Linux). Ejemplo:
+//     EXPO_PUBLIC_API_URL=http://192.168.1.35:3000        (backend en esta computadora, visto desde el celular)
+//     EXPO_PUBLIC_API_URL=https://mi-backend.onrender.com   (backend publicado)
 //
-//     const API_CELULAR = "http://192.168.1.35:3000";
-//
-// El celular y la computadora tienen que estar en la misma wifi. Más detalles en el README.
+// Si no se define:
+//   - Celular: hay que definirla (el celular no puede usar localhost, tiene que ser la IP de la computadora).
+//   - Web publicada: usa la misma dirección de la página, bajo /api.
+//   - Web en desarrollo (npm run web, puerto 8081): usa el puerto 3000 de la misma computadora.
 const API_CELULAR = "http://TU-IP-AQUI:3000";
 
 // En la web no hace falta configurar nada:
@@ -24,7 +26,7 @@ export const API = process.env.EXPO_PUBLIC_API_URL ?? (Platform.OS === "web" ? d
 // Si todavía no se puso la IP, en vez de un error de red confuso se avisa qué hay que hacer.
 const avisarSiFalta = () => {
   if (API.includes("TU-IP-AQUI"))
-    throw new Error("Falta configurar la IP del backend. Abrí packages/frontend/src/api.js y cambiá TU-IP-AQUI por la IP de tu computadora (el backend la muestra al arrancar).");
+    throw new Error("Falta configurar la dirección del backend. Creá el archivo packages/frontend/.env con EXPO_PUBLIC_API_URL=http://IP-DE-TU-COMPUTADORA:3000 (el backend muestra la línea exacta al arrancar) y volvé a abrir la app.");
 };
 
 // El token de la sesión actual. Se guarda acá para mandarlo en cada pedido.
