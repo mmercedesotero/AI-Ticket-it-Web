@@ -15,6 +15,7 @@ import { imagenDe } from "../imagenes";
 import { abrirEnMapas, direccionCompleta } from "../lugar";
 import { useEscritorio } from "../web";
 import EntradaWeb from "./EntradaWeb";
+import Cargando from "../componentes/Cargando";
 
 // Qué se muestra en el seguimiento por cada estado por el que pasó la compra.
 const PASOS = {
@@ -72,7 +73,7 @@ export default function EntradaScreen({ route, navigation }) {
   };
 
   if (error) return <Text style={styles.centro}>Error: {error}</Text>;
-  if (!compra) return <Text style={styles.centro}>Cargando...</Text>;
+  if (!compra) return <Cargando />;
 
   const estado = ESTADOS[compra.estado];
   const pasada = esPasada(compra);

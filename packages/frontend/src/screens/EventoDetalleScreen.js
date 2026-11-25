@@ -17,6 +17,7 @@ import Chip from "../componentes/Chip";
 import { abrirEnMapas, ciudadYPais } from "../lugar";
 import { useEscritorio } from "../web";
 import EventoDetalleWeb from "./EventoDetalleWeb";
+import Cargando from "../componentes/Cargando";
 
 export default function EventoDetalleScreen({ route, navigation }) {
   const { id } = route.params;
@@ -63,7 +64,7 @@ export default function EventoDetalleScreen({ route, navigation }) {
   };
 
   if (error) return <Text style={styles.centro}>Error: {error}</Text>;
-  if (!evento) return <Text style={styles.centro}>Cargando...</Text>;
+  if (!evento) return <Cargando />;
 
   if (escritorio) {
     return (

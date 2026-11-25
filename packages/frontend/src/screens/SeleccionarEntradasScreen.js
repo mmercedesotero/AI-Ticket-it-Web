@@ -17,6 +17,7 @@ import { iconoDe } from "../componentes/TarjetaEvento";
 import { colores, radios } from "../tema";
 import { formatearFechaLarga, formatearPrecio, yaSeRealizo } from "../formato";
 import { imagenDe } from "../imagenes";
+import Cargando from "../componentes/Cargando";
 
 export default function SeleccionarEntradasScreen({ route, navigation }) {
   const { id } = route.params;
@@ -43,7 +44,7 @@ export default function SeleccionarEntradasScreen({ route, navigation }) {
   }, [id]);
 
   if (error) return <Text style={styles.centro}>Error: {error}</Text>;
-  if (!evento) return <Text style={styles.centro}>Cargando...</Text>;
+  if (!evento) return <Cargando />;
 
   const foto = imagenDe(evento);
   const finalizado = yaSeRealizo(evento.fecha);
