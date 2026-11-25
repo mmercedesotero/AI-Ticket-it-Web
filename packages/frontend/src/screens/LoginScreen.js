@@ -8,7 +8,9 @@ import { enviar } from "../api";
 import { alerta } from "../dialogo";
 import { useSesion } from "../sesion";
 import Logo from "../componentes/Logo";
+import AccesoDividido from "../componentes/AccesoDividido";
 import { colores, estilosBase } from "../tema";
+import { soloWeb } from "../web";
 
 export default function LoginScreen({ navigation }) {
   const { iniciarSesion } = useSesion();
@@ -30,6 +32,7 @@ export default function LoginScreen({ navigation }) {
   };
 
   return (
+    <AccesoDividido lema="Tus eventos favoritos, en un solo lugar">
     <KeyboardAvoidingView style={styles.fondo} behavior={Platform.OS === "ios" ? "padding" : undefined}>
       <ScrollView contentContainerStyle={styles.contenedor} keyboardShouldPersistTaps="handled">
         <View style={styles.logo}>
@@ -48,6 +51,7 @@ export default function LoginScreen({ navigation }) {
           onChangeText={setEmail}
           autoCapitalize="none"
           keyboardType="email-address"
+          onSubmitEditing={entrar}
         />
 
         <Text style={styles.label}>Contraseña</Text>
@@ -60,6 +64,7 @@ export default function LoginScreen({ navigation }) {
             onChangeText={setPassword}
             secureTextEntry={!verPassword}
             autoCapitalize="none"
+            onSubmitEditing={entrar}
           />
           <Pressable onPress={() => setVerPassword(!verPassword)} hitSlop={10}>
             <Ionicons name={verPassword ? "eye-outline" : "eye-off-outline"} size={20} color={colores.textoSuave} />
@@ -86,12 +91,13 @@ export default function LoginScreen({ navigation }) {
         </Text>
       </ScrollView>
     </KeyboardAvoidingView>
+    </AccesoDividido>
   );
 }
 
 const styles = StyleSheet.create({
   fondo: { flex: 1, backgroundColor: colores.blanco },
-  contenedor: { flexGrow: 1, justifyContent: "center", paddingHorizontal: 24, paddingVertical: 32 },
+  contenedor: { flexGrow: 1, justifyContent: "center", paddingHorizontal: 24, paddingVertical: 32, ...soloWeb({ width: "100%", maxWidth: 460, alignSelf: "center" }) },
   logo: { alignItems: "center", marginBottom: 40 },
   bienvenida: { textAlign: "center", color: colores.textoSuave, fontSize: 16, marginBottom: 15, marginTop: -20 },
   titulo: { textAlign: "center", fontSize: 28, fontWeight: "800", color: colores.indigo, marginTop: 4, marginBottom: 28 },

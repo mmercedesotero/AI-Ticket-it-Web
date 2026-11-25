@@ -6,6 +6,7 @@ import {
   Text, TextInput, View,
 } from "react-native";
 import { useAnchoContenido, useEscritorio } from "../web";
+import EventosWeb from "./EventosWeb";
 import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { get } from "../api";
@@ -29,7 +30,7 @@ const ORDENES = [
 
 const SEPARACION = 12;
 
-export default function EventosScreen({ navigation }) {
+export default function EventosScreen({ navigation, route }) {
   const { sesion } = useSesion();
   const lista = useRef(null);
   useScrollToTop(lista);
@@ -51,6 +52,15 @@ export default function EventosScreen({ navigation }) {
 
   // La tarjeta del carrusel deja asomar un pedacito de la siguiente.
   const anchoTarjeta = escritorio ? 440 : ancho - 32 - 28;
+
+  // La búsqueda de la barra de arriba (web) llega como parámetro.
+  const buscadoDesdeBarra = route?.params?.texto;
+  useEffect(() => {
+    if (buscadoDesdeBarra) {
+      setTexto(buscadoDesdeBarra);
+      setTextoBuscado(buscadoDesdeBarra);
+    }
+  }, [buscadoDesdeBarra, route?.params?.t]);
 
   // Espera un instante después de la última letra antes de buscar, para no pedir al servidor en cada tecla.
   useEffect(() => {
@@ -100,6 +110,19 @@ export default function EventosScreen({ navigation }) {
   const abrir = (evento) => navigation.navigate("Detalle", { id: evento.id });
 
   if (error) return <Text style={styles.centro}>Error: {error}</Text>;
+
+  if (escritorio) {
+    return (
+      <EventosWeb
+        texto={texto} setTexto={setTexto} buscarYa={() => setTextoBuscado(texto)}
+        categorias={categorias} categoriaId={categoriaId} setCategoriaId={setCategoriaId}
+        ciudades={ciudades} ciudad={ciudad} setCiudad={setCiudad} orden={orden} setOrden={setOrden}
+        eventos={eventos} buscando={buscando} favoritosVigentes={favoritosVigentes}
+        esFavorito={esFavorito} alternarFavorito={alternarFavorito} abrir={abrir}
+        verFavoritos={() => navigation.navigate("Favoritos")} cargado={cargado}
+      />
+    );
+  }
 
   const encabezado = (
     <View>

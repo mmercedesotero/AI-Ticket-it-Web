@@ -154,7 +154,7 @@ El celular **no puede** usar `localhost` para llegar al backend: `localhost` ser
    ```
    Para usar la app en el celular, abrí packages/frontend/src/api.js y poné esta dirección:
 
-       export const API = "http://192.168.1.35:3000";
+       const API_CELULAR = "http://192.168.1.35:3000";
    ```
 
    También se puede ver a mano: en **Windows**, `ipconfig` y buscá "Dirección IPv4" del adaptador de wifi; en **Mac / Linux**, `ifconfig` o `ip addr`.
@@ -162,7 +162,7 @@ El celular **no puede** usar `localhost` para llegar al backend: `localhost` ser
 2. **Abrí [`packages/frontend/src/api.js`](packages/frontend/src/api.js)** y reemplazá `TU-IP-AQUI` por esa IP:
 
    ```js
-   export const API = "http://192.168.1.35:3000";   // antes: "http://TU-IP-AQUI:3000"
+   const API_CELULAR = "http://192.168.1.35:3000";   // antes: "http://TU-IP-AQUI:3000"
    ```
 
 3. Guardá el archivo. La computadora y el celular tienen que estar **en la misma wifi**.
@@ -180,6 +180,37 @@ npx expo start -c
 ```
 
 El `-c` limpia el caché, conviene usarlo la primera vez o cuando algo se vea raro. Aparece un código QR en la terminal: escanealo con **Expo Go** (en Android) o con la cámara (en iPhone).
+
+### Versión web
+
+La misma app corre en el navegador, con un diseño de escritorio (barra de navegación arriba, pantallas en columnas, calendario y mensajes a pantalla ancha). En pantallas angostas conserva el diseño del celular.
+
+**En desarrollo** (con el backend levantado, Paso 1):
+
+```bash
+cd packages/frontend
+npm run web
+```
+
+Se abre en `http://localhost:8081`. **No hace falta configurar ninguna IP**: la web busca el backend en el puerto 3000 de la misma computadora.
+
+La sesión queda guardada en el navegador (recargar la página no cierra la sesión) y las pantallas tienen dirección propia (`/explorar`, `/evento/12`, `/mis-compras`, `/mensajes`...), así que se pueden compartir y funciona el botón "atrás" del navegador.
+
+### Publicarla en Railway
+
+El backend publica la web y la API desde el mismo servidor (la API queda también bajo `/api`), así que se publica **un solo servicio**:
+
+1. Subir el proyecto a GitHub y, en [Railway](https://railway.com), crear un proyecto nuevo con **Deploy from GitHub repo**.
+2. Railway lee [`railway.json`](railway.json): instala las dependencias, genera la web (`npm run build`, que ejecuta `expo export` y deja el resultado en `packages/frontend/dist`) y arranca el servidor (`npm start`). No hace falta configurar comandos a mano.
+3. En la pestaña **Settings → Networking** del servicio, tocar **Generate Domain** para obtener la dirección pública (HTTPS incluido).
+4. Recomendado: en **Variables** agregar `JWT_SECRET` con un texto largo y propio, para que no se use el secreto de desarrollo.
+
+Cosas a tener en cuenta:
+
+- El puerto lo da Railway en la variable `PORT` (el servidor ya la usa).
+- Los datos siguen en memoria: cada vez que Railway reinicia o vuelve a desplegar el servicio, vuelven los datos de prueba y se pierden las cuentas y compras nuevas. Para uso real habría que agregar una base de datos.
+- Las fotos de perfil y de portada se guardan en memoria, así que también se pierden al reiniciar.
+- Para probar el resultado publicado en la propia computadora: `npm run build` en la raíz y después `npm start`, y abrir `http://localhost:3000`.
 
 ### Correr los tests del backend
 

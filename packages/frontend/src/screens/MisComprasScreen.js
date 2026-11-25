@@ -13,9 +13,12 @@ import { textoLugar } from "../lugar";
 import { ESTADOS, esPasada, estiloEstado, textoDias, textoReserva } from "../compras";
 import { colores } from "../tema";
 import { formatearFechaLarga, formatearPrecio } from "../formato";
+import { useEscritorio } from "../web";
+import MisComprasWeb from "./MisComprasWeb";
 
 export default function MisComprasScreen({ navigation }) {
   const insets = useSafeAreaInsets();
+  const escritorio = useEscritorio();
   const lista = useRef(null);
   useScrollToTop(lista);
   const [compras, setCompras] = useState([]);
@@ -39,6 +42,7 @@ export default function MisComprasScreen({ navigation }) {
   const { refreshProps, indicador } = useRefrescar(cargar);
 
   if (error) return <Text style={styles.centro}>Error: {error}</Text>;
+  if (escritorio) return <MisComprasWeb compras={compras} navigation={navigation} />;
 
   const activas = compras.filter((c) => !esPasada(c));
   const pasadas = compras.filter(esPasada);

@@ -9,6 +9,9 @@ import { elegirFoto } from "../foto";
 import { useEventos } from "../eventos";
 import Chip from "../componentes/Chip";
 import { colores, estilosBase, radios } from "../tema";
+import { formatearFechaLarga, formatearPrecio } from "../formato";
+import { esWeb, useEscritorio } from "../web";
+import { CampoFecha } from "../componentes/CamposWeb";
 
 const entradaVacia = () => ({ nombre: "", precio: "", ubicacion: "", cupo: "" });
 
@@ -16,6 +19,7 @@ const entradaVacia = () => ({ nombre: "", precio: "", ubicacion: "", cupo: "" })
 export default function CrearEventoScreen({ route, navigation }) {
   const eventoId = route.params?.eventoId;
   const editando = eventoId !== undefined;
+  const escritorio = useEscritorio();
 
   const { categorias, recargar } = useEventos();
   const [cargando, setCargando] = useState(editando);
@@ -176,12 +180,15 @@ export default function CrearEventoScreen({ route, navigation }) {
 
   return (
     <ScrollView
-      style={styles.fondo}
-      contentContainerStyle={styles.contenedor}
+      style={[styles.fondo, escritorio && styles.fondoWeb]}
+      contentContainerStyle={[styles.contenedor, escritorio && styles.contenedorWeb]}
       keyboardShouldPersistTaps="handled"
       automaticallyAdjustKeyboardInsets
       keyboardDismissMode="interactive"
     >
+      <View style={escritorio ? styles.filasWeb : undefined}>
+      <View style={escritorio ? styles.formularioWeb : undefined}>
+      {escritorio && <Text style={styles.tituloWeb}>{editando ? "Editar evento" : "Crear Nuevo Evento"}</Text>}
       <Pressable style={[styles.portada, portada && styles.portadaConImagen]} onPress={elegirPortada}>
         {portada ? (
           <>
@@ -216,17 +223,22 @@ export default function CrearEventoScreen({ route, navigation }) {
       />
 
       <Text style={styles.label}>Fecha</Text>
-      <View style={styles.campoConIcono}>
-        <Ionicons name="calendar-outline" size={18} color={colores.textoSuave} />
-        <TextInput
-          style={styles.inputIcono}
-          placeholder="AAAA-MM-DD (ej. 2027-05-20)"
-          placeholderTextColor={colores.textoPlaceholder}
-          value={fecha}
-          onChangeText={setFecha}
-          autoCapitalize="none"
-        />
-      </View>
+      {esWeb ? (
+        // En la web se elige con el calendario del navegador (el valor sigue siendo AAAA-MM-DD).
+        <CampoFecha valor={fecha} onCambio={setFecha} />
+      ) : (
+        <View style={styles.campoConIcono}>
+          <Ionicons name="calendar-outline" size={18} color={colores.textoSuave} />
+          <TextInput
+            style={styles.inputIcono}
+            placeholder="AAAA-MM-DD (ej. 2027-05-20)"
+            placeholderTextColor={colores.textoPlaceholder}
+            value={fecha}
+            onChangeText={setFecha}
+            autoCapitalize="none"
+          />
+        </View>
+      )}
       {editando && <Text style={styles.ayuda}>Si cambiás la fecha, les avisamos a quienes ya compraron.</Text>}
 
       <Text style={styles.label}>Descripción</Text>
@@ -396,7 +408,51 @@ export default function CrearEventoScreen({ route, navigation }) {
           <Text style={styles.eliminarTexto}>{eliminando ? "Eliminando..." : "Eliminar evento"}</Text>
         </Pressable>
       )}
+      </View>
+
+      {escritorio && (
+        <VistaPrevia
+          portada={portada} nombre={nombre} fecha={fecha} entradas={entradas}
+          lugar={[lugarNombre, lugarCiudad].filter(Boolean).join(" · ")}
+          categoria={categorias.find((c) => c.id === categoriaId)?.nombre}
+        />
+      )}
+      </View>
     </ScrollView>
+  );
+}
+
+// Cómo va a verse el evento en la lista, mientras se completa el formulario (solo en la web de escritorio).
+function VistaPrevia({ portada, nombre, fecha, lugar, categoria, entradas }) {
+  const fechaValida = /^\d{4}-\d{2}-\d{2}$/.test(fecha);
+  const conPrecio = entradas.filter((e) => e.nombre.trim() !== "" || e.precio.trim() !== "");
+
+  return (
+    <View style={styles.vistaPrevia}>
+      <Text style={styles.vistaTitulo}>Vista previa en tiempo real</Text>
+      <View style={styles.vistaImagen}>
+        {portada ? <Image source={{ uri: portada }} style={styles.portadaImagen} resizeMode="cover" /> : <Ionicons name="image-outline" size={40} color={colores.textoPlaceholder} />}
+        {categoria ? (
+          <View style={styles.vistaCategoria}>
+            <Text style={styles.vistaCategoriaTexto}>{categoria}</Text>
+          </View>
+        ) : null}
+      </View>
+      <Text style={styles.vistaNombre}>{nombre.trim() || "Nombre del evento"}</Text>
+      <Text style={styles.vistaDetalle}>{fechaValida ? formatearFechaLarga(fecha) : fecha || "Fecha del evento"}</Text>
+      <Text style={styles.vistaDetalle}>{lugar || "Lugar del evento"}</Text>
+
+      {conPrecio.length > 0 && (
+        <View style={styles.vistaEntradas}>
+          {conPrecio.map((e, i) => (
+            <View key={e.id ?? i} style={styles.vistaFila}>
+              <Text style={styles.vistaFilaTexto}>{e.nombre.trim() || "Entrada"}</Text>
+              <Text style={styles.vistaFilaPrecio}>{e.precio.trim() !== "" && !Number.isNaN(Number(e.precio)) ? formatearPrecio(Number(e.precio)) : "–"}</Text>
+            </View>
+          ))}
+        </View>
+      )}
+    </View>
   );
 }
 
@@ -458,4 +514,28 @@ const styles = StyleSheet.create({
   agregarTexto: { color: colores.acento, fontWeight: "700" },
 
   publicar: { marginTop: 24 },
+
+  // Versión web de escritorio
+  fondoWeb: { backgroundColor: colores.fondo },
+  contenedorWeb: { padding: 24, paddingBottom: 56 },
+  filasWeb: { flexDirection: "row", gap: 24, alignItems: "flex-start" },
+  formularioWeb: { flex: 1, backgroundColor: colores.blanco, borderRadius: 16, borderWidth: 1, borderColor: colores.borde, padding: 28 },
+  tituloWeb: { fontSize: 26, fontWeight: "800", color: colores.indigo, marginBottom: 18 },
+  vistaPrevia: {
+    width: 340, position: "sticky", top: 16, backgroundColor: colores.blanco, borderRadius: 16, borderWidth: 1,
+    borderColor: colores.borde, padding: 18,
+  },
+  vistaTitulo: { fontSize: 14, fontWeight: "800", color: colores.indigo, marginBottom: 12 },
+  vistaImagen: {
+    aspectRatio: 16 / 9, borderRadius: 12, overflow: "hidden", backgroundColor: colores.fondo,
+    alignItems: "center", justifyContent: "center",
+  },
+  vistaCategoria: { position: "absolute", top: 8, left: 8, backgroundColor: colores.blanco, borderRadius: 9, paddingHorizontal: 8, paddingVertical: 3 },
+  vistaCategoriaTexto: { fontSize: 11, fontWeight: "700", color: colores.acento },
+  vistaNombre: { fontSize: 17, fontWeight: "800", color: colores.indigo, marginTop: 12 },
+  vistaDetalle: { color: colores.textoSuave, fontSize: 13, marginTop: 3 },
+  vistaEntradas: { marginTop: 14, paddingTop: 10, borderTopWidth: 1, borderColor: colores.borde, gap: 6 },
+  vistaFila: { flexDirection: "row", justifyContent: "space-between" },
+  vistaFilaTexto: { color: colores.indigo, fontSize: 14 },
+  vistaFilaPrecio: { color: colores.indigo, fontWeight: "800", fontSize: 14 },
 });

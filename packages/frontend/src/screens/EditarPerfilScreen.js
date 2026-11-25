@@ -27,6 +27,11 @@ function Campo({ etiqueta, children, derecha }) {
 }
 
 export default function EditarPerfilScreen({ navigation }) {
+  return <FormularioPerfil navigation={navigation} />;
+}
+
+// El formulario del perfil. `incrustado` lo usa dentro de la página de Perfil de la web (sin barra fija abajo).
+export function FormularioPerfil({ navigation, incrustado = false }) {
   const insets = useSafeAreaInsets();
   const { sesion, actualizarUsuario, cerrarSesion } = useSesion();
   const { usuario, rol } = sesion;
@@ -76,7 +81,7 @@ export default function EditarPerfilScreen({ navigation }) {
     try {
       const respuesta = await enviar("PUT", "/auth/perfil", datos);
       actualizarUsuario(respuesta.usuario);
-      alerta("¡Perfil actualizado!", "Tus cambios se guardaron correctamente.", [{ text: "Perfecto", onPress: () => navigation.goBack() }]);
+      alerta("¡Perfil actualizado!", "Tus cambios se guardaron correctamente.", [{ text: "Perfecto", onPress: () => !incrustado && navigation.goBack() }]);
     } catch (e) {
       alerta("No se pudo guardar", e.message);
     } finally {
@@ -116,9 +121,10 @@ export default function EditarPerfilScreen({ navigation }) {
     ]);
 
   return (
-    <KeyboardAvoidingView style={styles.fondo} behavior={Platform.OS === "ios" ? "padding" : undefined}>
+    <KeyboardAvoidingView style={incrustado ? undefined : styles.fondo} behavior={Platform.OS === "ios" ? "padding" : undefined}>
       <ScrollView
-        contentContainerStyle={[styles.contenedor, { paddingBottom: 130 + insets.bottom }]}
+        scrollEnabled={!incrustado}
+        contentContainerStyle={[styles.contenedor, incrustado ? { padding: 0 } : { paddingBottom: 130 + insets.bottom }]}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
@@ -240,8 +246,8 @@ export default function EditarPerfilScreen({ navigation }) {
         )}
       </ScrollView>
 
-      <View style={[styles.barra, { paddingBottom: insets.bottom + 12 }]}>
-        <Pressable style={[styles.guardar, guardando && { opacity: 0.6 }]} onPress={guardar} disabled={guardando}>
+      <View style={incrustado ? styles.barraIncrustada : [styles.barra, { paddingBottom: insets.bottom + 12 }]}>
+        <Pressable style={[styles.guardar, incrustado && styles.guardarIncrustado, guardando && { opacity: 0.6 }]} onPress={guardar} disabled={guardando}>
           <Text style={styles.guardarTexto}>{guardando ? "Guardando..." : "Guardar cambios"}</Text>
         </Pressable>
       </View>
@@ -305,4 +311,6 @@ const styles = StyleSheet.create({
   },
   guardar: { backgroundColor: colores.acento, borderRadius: radios.boton, paddingVertical: 15, alignItems: "center" },
   guardarTexto: { color: colores.blanco, fontWeight: "700", fontSize: 16 },
+  barraIncrustada: { alignItems: "flex-end", marginTop: 20, paddingTop: 16, borderTopWidth: 1, borderColor: colores.borde },
+  guardarIncrustado: { paddingHorizontal: 28, paddingVertical: 12 },
 });

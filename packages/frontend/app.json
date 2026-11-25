@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "frontend",
+    "name": "Ticket It",
     "slug": "frontend",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -18,7 +18,12 @@
       }
     },
     "web": {
-      "favicon": "./assets/favicon.png"
+      "favicon": "./assets/favicon.png",
+      "bundler": "metro",
+      "output": "single",
+      "name": "Ticket It",
+      "shortName": "Ticket It",
+      "description": "Entradas a un click"
     },
     "plugins": [
       "expo-sharing"

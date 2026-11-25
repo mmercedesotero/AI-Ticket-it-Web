@@ -12,6 +12,8 @@ import { useFocusEffect, useScrollToTop } from "@react-navigation/native";
 import { get } from "../api";
 import { useSesion } from "../sesion";
 import { colores, radios } from "../tema";
+import { useEscritorio } from "../web";
+import PerfilWeb from "./PerfilWeb";
 
 // Opciones que todavía no tienen pantalla propia.
 const OPCIONES = [
@@ -23,6 +25,7 @@ const OPCIONES = [
 
 export default function PerfilScreen({ navigation }) {
   const insets = useSafeAreaInsets();
+  const escritorio = useEscritorio();
   const lista = useRef(null);
   useScrollToTop(lista);
   const { sesion, cerrarSesion } = useSesion();
@@ -76,6 +79,15 @@ export default function PerfilScreen({ navigation }) {
   };
 
   const mostrar = (n) => (n === null ? "–" : String(n));
+
+  if (escritorio) {
+    return (
+      <PerfilWeb
+        usuario={usuario} nombreCompleto={nombreCompleto} esOrganizador={esOrganizador}
+        numeros={numeros} navigation={navigation} salir={salir}
+      />
+    );
+  }
 
   return (
     <View style={styles.fondo}>

@@ -15,6 +15,8 @@ import { colores, radios } from "../tema";
 import { formatearFechaLarga, formatearPrecio, yaSeRealizo } from "../formato";
 import { imagenDe } from "../imagenes";
 import { textoLugar } from "../lugar";
+import { useEscritorio } from "../web";
+import OrganizadorWeb from "./OrganizadorWeb";
 
 const CORAL_OSCURO = "#B5503C";
 
@@ -37,6 +39,7 @@ const FILTROS = [
 
 export default function OrganizadorScreen({ navigation }) {
   const insets = useSafeAreaInsets();
+  const escritorio = useEscritorio();
   const lista = useRef(null);
   useScrollToTop(lista);
   const { sesion } = useSesion();
@@ -107,6 +110,16 @@ export default function OrganizadorScreen({ navigation }) {
   const visibles = base
     .filter((d) => (filtroActual.cumple ? filtroActual.cumple(d) : true))
     .sort((a, b) => (estado === "finalizados" ? b.dias - a.dias : a.dias - b.dias));
+
+  if (escritorio) {
+    return (
+      <OrganizadorWeb
+        nombre={organizador.nombre} error={error} proximos={proximos} vendidas={vendidas} capacidad={capacidad}
+        ingresos={ingresos} activos={activos} resenias={resenias} estado={estado} setEstado={setEstado}
+        finalizados={finalizados} eventos={eventos} visibles={visibles} navigation={navigation}
+      />
+    );
+  }
 
   return (
     <View style={styles.fondo}>

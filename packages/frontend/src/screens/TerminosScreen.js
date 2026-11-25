@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import * as Print from "expo-print";
@@ -7,11 +7,16 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { alerta } from "../dialogo";
 import { ACTUALIZACION_TERMINOS, INTRO_TERMINOS, POLITICA_PRIVACIDAD, TERMINOS } from "../contenidoLegal";
 import { colores, radios } from "../tema";
+import { esWeb, imprimirHtml, useEscritorio } from "../web";
 
 const sinTildes = (texto) => texto.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
 
 export default function TerminosScreen() {
   const insets = useSafeAreaInsets();
+  const escritorio = useEscritorio();
+  const desplazar = useRef(null);
+  const posiciones = useRef({});
+  const columna = useRef(0);
   const [busqueda, setBusqueda] = useState("");
   const [abiertos, setAbiertos] = useState(new Set());
 
@@ -43,6 +48,11 @@ export default function TerminosScreen() {
         <h2>Políticas de privacidad</h2><p>${POLITICA_PRIVACIDAD}</p>
       </body></html>`;
 
+      if (esWeb) {
+        if (!imprimirHtml(html)) alerta("No se pudo abrir el PDF", "El navegador bloqueó la ventana nueva. Permití las ventanas emergentes para este sitio y probá de nuevo.");
+        return;
+      }
+
       const { uri } = await Print.printToFileAsync({ html });
       if (await Sharing.isAvailableAsync()) {
         await Sharing.shareAsync(uri, { mimeType: "application/pdf", dialogTitle: "Términos y condiciones", UTI: "com.adobe.pdf" });
@@ -53,6 +63,69 @@ export default function TerminosScreen() {
       alerta("No se pudo generar el PDF", e.message);
     }
   };
+
+  // Web de escritorio: índice a la izquierda y todas las secciones abiertas a la derecha.
+  if (escritorio) {
+    const irA = (titulo) => {
+      const y = (columna.current ?? 0) + (posiciones.current[titulo] ?? 0);
+      desplazar.current?.scrollTo({ y: y - 16, animated: true });
+    };
+
+    return (
+      <ScrollView ref={desplazar} style={styles.fondo} contentContainerStyle={styles.contenedorWeb} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
+        <Text style={styles.tituloWeb}>Términos y Condiciones de Uso</Text>
+        <View style={styles.fecha}>
+          <Text style={styles.fechaTexto}>Última actualización: {ACTUALIZACION_TERMINOS}</Text>
+        </View>
+
+        <View style={styles.barraWeb}>
+          <View style={[styles.buscador, styles.buscadorWeb]}>
+            <Ionicons name="search-outline" size={18} color={colores.textoSuave} />
+            <TextInput
+              style={styles.buscadorInput}
+              placeholder="Buscar en los términos..."
+              placeholderTextColor={colores.textoPlaceholder}
+              value={busqueda}
+              onChangeText={setBusqueda}
+            />
+          </View>
+          <Pressable style={styles.botonPdfWeb} onPress={descargarPdf}>
+            <Ionicons name="download-outline" size={16} color={colores.acento} />
+            <Text style={styles.pieTextoPrincipal}>Descargar en PDF</Text>
+          </Pressable>
+        </View>
+
+        <View style={styles.columnasWeb}>
+          <View style={styles.indiceWeb}>
+            {TERMINOS.map((t) => (
+              <Pressable key={t.titulo} style={styles.indiceItem} onPress={() => irA(t.titulo)}>
+                <Text style={styles.indiceTexto} numberOfLines={2}>{t.titulo}</Text>
+              </Pressable>
+            ))}
+          </View>
+
+          <View style={styles.seccionesWeb} onLayout={(e) => { columna.current = e.nativeEvent.layout.y; }}>
+            {buscado === "" && (
+              <View style={styles.intro}>
+                <Text style={styles.introTexto}>{INTRO_TERMINOS}</Text>
+              </View>
+            )}
+            {visibles.map((t) => (
+              <View key={t.titulo} style={styles.seccion} onLayout={(e) => { posiciones.current[t.titulo] = e.nativeEvent.layout.y; }}>
+                <Text style={[styles.seccionTitulo, { marginBottom: 8 }]}>{t.titulo}</Text>
+                <Text style={styles.seccionTexto}>{t.texto}</Text>
+              </View>
+            ))}
+            {visibles.length === 0 && <Text style={styles.vacioTexto}>No encontramos resultados para "{busqueda}".</Text>}
+
+            <Pressable onPress={() => alerta("Políticas de privacidad", POLITICA_PRIVACIDAD)} hitSlop={8} style={{ alignSelf: "center", marginTop: 14 }}>
+              <Text style={styles.pieTexto}>Ver políticas de privacidad</Text>
+            </Pressable>
+          </View>
+        </View>
+      </ScrollView>
+    );
+  }
 
   return (
     <View style={styles.fondo}>
@@ -159,4 +232,22 @@ const styles = StyleSheet.create({
   pieEnlace: { flexDirection: "row", alignItems: "center", gap: 6 },
   pieTextoPrincipal: { color: colores.acento, fontWeight: "700" },
   pieTexto: { color: colores.textoSuave, fontSize: 13 },
+
+  // Versión web de escritorio
+  contenedorWeb: { paddingHorizontal: 24, paddingTop: 28, paddingBottom: 56 },
+  tituloWeb: { fontSize: 30, fontWeight: "800", color: colores.indigo, marginBottom: 10 },
+  barraWeb: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", gap: 16, marginTop: 6, marginBottom: 22 },
+  buscadorWeb: { flex: 1, maxWidth: 420, marginBottom: 0 },
+  botonPdfWeb: {
+    flexDirection: "row", alignItems: "center", gap: 7, height: 46, paddingHorizontal: 18, borderRadius: 10,
+    borderWidth: 1, borderColor: colores.acento, backgroundColor: colores.blanco,
+  },
+  columnasWeb: { flexDirection: "row", gap: 24, alignItems: "flex-start" },
+  indiceWeb: {
+    width: 260, position: "sticky", top: 16, backgroundColor: colores.blanco, borderWidth: 1, borderColor: colores.borde,
+    borderRadius: 14, padding: 10,
+  },
+  indiceItem: { paddingHorizontal: 10, paddingVertical: 9, borderRadius: 8 },
+  indiceTexto: { color: colores.indigo, fontSize: 13, fontWeight: "600" },
+  seccionesWeb: { flex: 1 },
 });

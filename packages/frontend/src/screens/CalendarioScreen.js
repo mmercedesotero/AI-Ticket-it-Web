@@ -15,6 +15,7 @@ import { colores, radios } from "../tema";
 import { formatearFechaLarga } from "../formato";
 import { imagenDe } from "../imagenes";
 import { textoLugar } from "../lugar";
+import { useEscritorio } from "../web";
 
 const MESES = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
 const DIAS = ["L", "M", "M", "J", "V", "S", "D"];
@@ -27,6 +28,7 @@ const clave = (anio, mes, dia) => `${anio}-${String(mes + 1).padStart(2, "0")}-$
 // El comprador ve sus entradas y sus favoritos; el organizador ve sus eventos.
 export default function CalendarioScreen({ navigation }) {
   const insets = useSafeAreaInsets();
+  const escritorio = useEscritorio();
   const listaRef = useRef(null);
   useScrollToTop(listaRef);
   const { sesion } = useSesion();
@@ -125,7 +127,7 @@ export default function CalendarioScreen({ navigation }) {
 
   return (
     <View style={styles.fondo}>
-      <CabeceraPantalla titulo="Calendario" />
+      {!escritorio && <CabeceraPantalla titulo="Calendario" />}
       {indicador}
       <ScrollView
         ref={listaRef}
@@ -133,6 +135,9 @@ export default function CalendarioScreen({ navigation }) {
         showsVerticalScrollIndicator={false}
         {...refreshProps}
       >
+        {escritorio && <Text style={styles.tituloWeb}>Calendario de Eventos</Text>}
+        <View style={escritorio ? styles.columnasWeb : undefined}>
+        <View style={escritorio ? styles.columnaCalendario : undefined}>
         <View style={styles.tarjeta}>
           <View style={styles.mesFila}>
             <Text style={styles.mes}>
@@ -172,6 +177,7 @@ export default function CalendarioScreen({ navigation }) {
                   <View
                     style={[
                       styles.numero,
+                      escritorio && styles.numeroWeb,
                       conEventos && styles.numeroConEventos,
                       esHoy && styles.numeroHoy,
                       elegido && !esHoy && styles.numeroElegido,
@@ -209,6 +215,9 @@ export default function CalendarioScreen({ navigation }) {
             <Segmentos opciones={opciones} valor={filtro} onCambiar={setFiltro} />
           </View>
         )}
+        </View>
+
+        <View style={escritorio ? styles.columnaLista : undefined}>
 
         <View style={styles.seccionFila}>
           <Text style={styles.seccion}>
@@ -233,6 +242,8 @@ export default function CalendarioScreen({ navigation }) {
             </Text>
           </View>
         )}
+        </View>
+        </View>
       </ScrollView>
     </View>
   );
@@ -288,6 +299,11 @@ const styles = StyleSheet.create({
     width: 40, height: 44, borderRadius: 12, alignItems: "center", justifyContent: "center",
     borderWidth: 1, borderColor: "transparent",
   },
+  numeroWeb: { width: "90%", height: 62 },
+  tituloWeb: { fontSize: 28, fontWeight: "800", color: colores.indigo, marginBottom: 18 },
+  columnasWeb: { flexDirection: "row", gap: 24, alignItems: "flex-start" },
+  columnaCalendario: { flex: 1.7 },
+  columnaLista: { flex: 1 },
   numeroConEventos: { backgroundColor: colores.acentoSuave, borderColor: "rgba(239,128,108,0.35)" },
   numeroHoy: { backgroundColor: colores.acento, borderColor: colores.acento },
   numeroElegido: { borderColor: colores.indigo, borderWidth: 2 },

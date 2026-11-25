@@ -6,12 +6,14 @@ import { alerta } from "../dialogo";
 import { CATEGORIAS_AYUDA, PREGUNTAS } from "../contenidoLegal";
 import { useSesion } from "../sesion";
 import { colores, radios } from "../tema";
+import { useEscritorio } from "../web";
 
 const CORREO_SOPORTE = "soporte@tickettit.com";
 const sinTildes = (texto) => texto.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
 
 export default function AyudaScreen() {
   const insets = useSafeAreaInsets();
+  const escritorio = useEscritorio();
   const { sesion } = useSesion();
   const [busqueda, setBusqueda] = useState("");
   const [categoria, setCategoria] = useState("todas");
@@ -36,6 +38,88 @@ export default function AyudaScreen() {
     Linking.openURL(`mailto:${CORREO_SOPORTE}?subject=Consulta%20desde%20Ticket%20It`).catch(() =>
       alerta("No se pudo abrir el correo", `Escribinos a ${CORREO_SOPORTE}.`)
     );
+
+  // Web de escritorio: franja oscura con el buscador arriba, categorías en dos columnas y las preguntas debajo.
+  if (escritorio) {
+    return (
+      <ScrollView style={styles.fondo} contentContainerStyle={{ paddingBottom: 56 }} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
+        <View style={styles.heroWeb}>
+          <Text style={styles.heroTitulo}>¡Hola, {sesion.usuario.nombre}!{"\n"}¿Cómo podemos ayudarte hoy?</Text>
+          <View style={styles.heroBuscador}>
+            <TextInput
+              style={styles.heroBuscadorInput}
+              placeholder="Buscar preguntas frecuentes, problemas con entradas, reembolsos..."
+              placeholderTextColor={colores.textoPlaceholder}
+              value={busqueda}
+              onChangeText={setBusqueda}
+            />
+            <Ionicons name="search-outline" size={18} color={colores.textoSuave} />
+          </View>
+        </View>
+
+        <View style={styles.centradoWeb}>
+          <View style={styles.categoriasWeb}>
+            {CATEGORIAS_AYUDA.map((c) => {
+              const activa = buscado === "" && categoria === c.clave;
+              return (
+                <Pressable
+                  key={c.clave}
+                  style={[styles.categoriaWeb, activa && styles.categoriaActiva]}
+                  onPress={() => {
+                    setBusqueda("");
+                    setCategoria(activa ? "todas" : c.clave);
+                    setAbierta(null);
+                  }}
+                >
+                  <View style={styles.categoriaIcono}>
+                    <Ionicons name={c.icono} size={24} color={colores.acento} />
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.categoriaTitulo}>{c.titulo}</Text>
+                    <Text style={styles.categoriaDetalle}>{c.detalle}</Text>
+                  </View>
+                </Pressable>
+              );
+            })}
+          </View>
+
+          <Text style={styles.tituloWeb}>{tituloLista}</Text>
+          <View style={styles.lista}>
+            {preguntas.map((p, i) => {
+              const esta = abierta === p.pregunta;
+              return (
+                <Pressable key={p.pregunta} style={[styles.pregunta, i > 0 && styles.preguntaSeparada]} onPress={() => setAbierta(esta ? null : p.pregunta)}>
+                  <View style={styles.preguntaFila}>
+                    <Text style={styles.preguntaTexto}>{p.pregunta}</Text>
+                    <Ionicons name={esta ? "chevron-up" : "chevron-down"} size={18} color={colores.textoSuave} />
+                  </View>
+                  {esta && <Text style={styles.respuesta}>{p.respuesta}</Text>}
+                </Pressable>
+              );
+            })}
+            {preguntas.length === 0 && <Text style={styles.sinResultados}>No encontramos resultados. Probá con otras palabras o escribinos.</Text>}
+          </View>
+
+          <View style={[styles.canales, styles.canalesWeb]}>
+            <Text style={styles.canalesTitulo}>¿No encontraste lo que buscabas? Contactanos</Text>
+            <View style={[styles.canalesBotones, { justifyContent: "center" }]}>
+              <Pressable
+                style={[styles.botonPrincipal, styles.botonWeb]}
+                onPress={() => alerta("Chat de soporte", "El chat con soporte no está disponible en esta versión de práctica. Escribinos por correo y te respondemos.")}
+              >
+                <Ionicons name="chatbubble-ellipses-outline" size={16} color={colores.blanco} />
+                <Text style={styles.botonPrincipalTexto}>Chatear con soporte en vivo</Text>
+              </Pressable>
+              <Pressable style={[styles.botonSecundario, styles.botonWeb]} onPress={enviarCorreo}>
+                <Ionicons name="mail-outline" size={16} color={colores.indigo} />
+                <Text style={styles.botonSecundarioTexto}>Enviar consulta por correo</Text>
+              </Pressable>
+            </View>
+          </View>
+        </View>
+      </ScrollView>
+    );
+  }
 
   return (
     <ScrollView
@@ -180,4 +264,23 @@ const styles = StyleSheet.create({
     borderWidth: 1, borderColor: colores.borde, borderRadius: 10, paddingVertical: 11,
   },
   botonSecundarioTexto: { color: colores.indigo, fontWeight: "600", fontSize: 13 },
+
+  // Versión web de escritorio
+  heroWeb: { backgroundColor: colores.indigo, alignItems: "center", paddingVertical: 52, paddingHorizontal: 24 },
+  heroTitulo: { color: colores.blanco, fontSize: 32, fontWeight: "800", textAlign: "center", lineHeight: 42 },
+  heroBuscador: {
+    flexDirection: "row", alignItems: "center", gap: 10, width: "100%", maxWidth: 620, height: 50, marginTop: 26,
+    backgroundColor: colores.blanco, borderRadius: 10, paddingHorizontal: 16,
+  },
+  heroBuscadorInput: { flex: 1, fontSize: 15, color: colores.indigo, outlineStyle: "none" },
+  centradoWeb: { width: "100%", maxWidth: 980, alignSelf: "center", paddingHorizontal: 24, paddingTop: 32 },
+  categoriasWeb: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 },
+  categoriaWeb: {
+    flexDirection: "row", alignItems: "center", gap: 14, backgroundColor: colores.blanco, borderWidth: 1,
+    borderColor: colores.borde, borderRadius: 14, padding: 18,
+  },
+  categoriaIcono: { width: 48, height: 48, borderRadius: 12, backgroundColor: colores.acentoSuave, alignItems: "center", justifyContent: "center" },
+  tituloWeb: { fontSize: 20, fontWeight: "800", color: colores.indigo, marginTop: 34, marginBottom: 14 },
+  canalesWeb: { alignItems: "center", marginTop: 30, padding: 26 },
+  botonWeb: { flex: 0, paddingHorizontal: 20 },
 });

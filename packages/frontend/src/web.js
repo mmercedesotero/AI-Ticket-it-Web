@@ -27,6 +27,18 @@ export function useAnchoContenido(maximo = ANCHO_LISTA) {
 // Estilos que solo se aplican en la web (por ejemplo, las hojas de abajo pasan a ser ventanas centradas).
 export const soloWeb = (estilos) => (esWeb ? estilos : {});
 
+// Abre un documento HTML en una pestaña nueva y lanza la impresión (desde ahí se puede guardar como PDF).
+// Hay que llamarla directo desde el toque del usuario, si no el navegador bloquea la ventana. Devuelve false si la bloqueó.
+export function imprimirHtml(html) {
+  const ventana = window.open("", "_blank");
+  if (!ventana) return false;
+  ventana.document.write(html);
+  ventana.document.close();
+  ventana.focus();
+  setTimeout(() => ventana.print(), 400);
+  return true;
+}
+
 // En el celular los avisos suben desde abajo; en la web son una ventana centrada.
 export const VENTANA = {
   fondo: { justifyContent: "center", alignItems: "center", padding: 16 },
