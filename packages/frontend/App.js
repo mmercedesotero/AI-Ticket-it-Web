@@ -1,4 +1,5 @@
 import { useRef, useState } from "react";
+import { ActivityIndicator, View } from "react-native";
 import { SafeAreaProvider, useSafeAreaInsets } from "react-native-safe-area-context";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
@@ -38,6 +39,15 @@ import TarjetasScreen from "./src/screens/TarjetasScreen";
 import EntradaScreen from "./src/screens/EntradaScreen";
 import AgregarTarjetaScreen from "./src/screens/AgregarTarjetaScreen";
 import PagarScreen from "./src/screens/PagarScreen";
+
+// Se muestra un instante mientras se resuelve en qué pantalla abrir (por ejemplo al recargar la página).
+function Cargando() {
+  return (
+    <View style={{ flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: colores.fondo }}>
+      <ActivityIndicator size="large" color={colores.acento} />
+    </View>
+  );
+}
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -219,7 +229,7 @@ export default function App() {
   return (
     <SafeAreaProvider>
     <SesionContext.Provider value={{ sesion, iniciarSesion, actualizarUsuario, cerrarSesion }}>
-      <NavigationContainer documentTitle={{ formatter: () => "Ticket It" }} linking={esWeb ? enlaces : undefined}>
+      <NavigationContainer fallback={<Cargando />} documentTitle={{ formatter: () => "Ticket It" }} linking={esWeb ? enlaces : undefined}>
         {sesion === null ? (
           <Stack.Navigator screenOptions={{ headerShown: false }} screenLayout={(p) => <CapaAcceso {...p} />}>
             <Stack.Screen name="Login" component={LoginScreen} />
