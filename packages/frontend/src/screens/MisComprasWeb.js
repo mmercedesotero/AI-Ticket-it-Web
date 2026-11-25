@@ -95,7 +95,7 @@ function Entrada({ compra, navigation }) {
               </Pressable>
             )}
 
-            <Pressable style={styles.secundario} onPress={async () => descargarComprobante([await get(`/compras/${compra.id}`)])}>
+            <Pressable style={styles.secundario} onPress={() => descargarComprobante(get(`/compras/${compra.id}`).then((c) => [c]))}>
               <Ionicons name="download-outline" size={16} color={colores.indigo} />
               <Text style={styles.secundarioTexto}>Descargar PDF</Text>
             </Pressable>

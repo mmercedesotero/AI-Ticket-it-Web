@@ -65,7 +65,7 @@ export default function PagarScreen({ route, navigation }) {
         monto={formatearPrecio(total)}
         mensaje={mensaje}
         textoContinuar="Ver mis entradas"
-        onComprobante={async () => descargarComprobante([await get(`/compras/${compraId}`)])}
+        onComprobante={() => descargarComprobante(get(`/compras/${compraId}`).then((c) => [c]))}
         onContinuar={() => {
           setEstado(null);
           navigation.navigate("Inicio", { screen: "Mis compras" });

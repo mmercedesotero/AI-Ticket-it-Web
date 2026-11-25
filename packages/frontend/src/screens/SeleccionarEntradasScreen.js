@@ -246,10 +246,7 @@ export default function SeleccionarEntradasScreen({ route, navigation }) {
         monto={formatearPrecio(total)}
         mensaje={mensajePago}
         textoContinuar="Ver mis entradas"
-        onComprobante={async () => {
-          const compras = await Promise.all([...creadas.current.values()].map((idCompra) => get(`/compras/${idCompra}`)));
-          descargarComprobante(compras);
-        }}
+        onComprobante={() => descargarComprobante(Promise.all([...creadas.current.values()].map((idCompra) => get(`/compras/${idCompra}`))))}
         onContinuar={() => {
           setEstadoPago(null);
           navigation.navigate("Inicio", { screen: "Mis compras" });
