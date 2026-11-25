@@ -3,7 +3,7 @@ import { ActivityIndicator, Animated, Easing, Image, Modal, Pressable, StyleShee
 import { Ionicons } from "@expo/vector-icons";
 import QRCode from "react-native-qrcode-svg";
 import { colores, radios } from "../tema";
-import { esWeb } from "../web";
+import { useEscritorio } from "../web";
 import { formatearFechaLarga } from "../formato";
 import { imagenDe } from "../imagenes";
 import { textoLugar } from "../lugar";
@@ -14,6 +14,8 @@ const VERDE = "#148C5E";
 // estado: null (oculto) | "procesando" | "exito" | "error"
 export default function PagoModal({ estado, monto, mensaje, resumen, onContinuar, textoContinuar, onComprobante, onReintentar, onCerrar }) {
   const { width, height } = useWindowDimensions();
+  // La tarjeta de "Compra exitosa" es solo para la web de escritorio; en el celular (app o web angosta) va el efecto verde.
+  const esWeb = useEscritorio();
   const circulo = useRef(new Animated.Value(0)).current;
   const tilde = useRef(new Animated.Value(0)).current;
 

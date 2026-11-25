@@ -22,7 +22,9 @@ async function fotoEnBase64(evento) {
   if (!fuente) return null;
 
   try {
-    const { uri } = Image.resolveAssetSource(fuente);
+    // Foto de prueba (require) o portada subida ({ uri }). En la web, si no hay resolveAssetSource, se usa lo que haya.
+    const resuelta = Image.resolveAssetSource ? Image.resolveAssetSource(fuente) : fuente;
+    const uri = typeof resuelta === "string" ? resuelta : resuelta?.uri ?? fuente?.uri ?? String(resuelta);
     const blob = await (await fetch(uri)).blob();
 
     return await new Promise((resolver, rechazar) => {
@@ -99,7 +101,16 @@ const ESTILOS = `
   .nota { color: #94A3B8; font-size: 11px; text-align: center; margin-top: 8px; }
 `;
 
+// Solo en la web: para que la hoja impresa salga igual que el PDF de la app (colores incluidos y sin el
+// encabezado y pie que agrega el navegador con la fecha y la dirección).
+const ESTILOS_WEB = `
+  @page { size: letter; margin: 0; }
+  * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+`;
+
 // Genera un PDF con un ticket por cada compra y abre el menú del sistema para guardarlo, imprimirlo o compartirlo.
+// "compras" puede ser la lista de compras o una promesa que la trae: así la ventana de la web se abre en el mismo
+// instante del toque (si se espera a los datos antes, el navegador del celular la bloquea).
 export async function descargarComprobante(compras) {
   // En la web el comprobante se abre en una pestaña nueva y se imprime (o se guarda como PDF desde ahí).
   // La pestaña se abre antes de armar el HTML, si no el navegador la bloquea por no venir del toque.
@@ -110,10 +121,11 @@ export async function descargarComprobante(compras) {
   }
 
   try {
-    const tickets = (await Promise.all(compras.map(ticketHtml))).join("");
+    const lista = await compras;
+    const tickets = (await Promise.all(lista.map(ticketHtml))).join("");
     const html = `
       <html>
-        <head><meta charset="utf-8" /><style>${ESTILOS}</style></head>
+        <head><meta charset="utf-8" /><style>${ESTILOS}${esWeb ? ESTILOS_WEB : ""}</style></head>
         <body>
           <div class="cabecera">
             <div class="logo">Ticket <span>It</span></div>
