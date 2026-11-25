@@ -12,6 +12,8 @@ import NotificacionesScreen from "./src/screens/NotificacionesScreen";
 import CalendarioScreen from "./src/screens/CalendarioScreen";
 import EditarPerfilScreen from "./src/screens/EditarPerfilScreen";
 import DialogoRaiz from "./src/componentes/DialogoRaiz";
+import ContenidoWeb from "./src/componentes/ContenidoWeb";
+import { ANCHO_ACCESO, ANCHO_BARRA, ANCHO_LISTA, ANCHO_PAGINA, useEscritorio } from "./src/web";
 import { colores } from "./src/tema";
 import LoginScreen from "./src/screens/LoginScreen";
 import RegistroScreen from "./src/screens/RegistroScreen";
@@ -48,7 +50,7 @@ const ICONOS_TAB = {
   Perfil: ["person", "person-outline"],
 };
 
-const opcionesTab = ({ route }, insets) => ({
+const opcionesTab = ({ route }, insets, escritorio) => ({
   headerShown: false,
   tabBarActiveTintColor: colores.acento,
   tabBarInactiveTintColor: colores.textoSuave,
@@ -57,11 +59,36 @@ const opcionesTab = ({ route }, insets) => ({
   tabBarIcon: ({ focused, color, size }) => (
     <Ionicons name={ICONOS_TAB[route.name][focused ? 0 : 1]} size={26} color={color} />
   ),
+  // En la web con pantalla grande las pestañas pasan a una barra lateral, con su nombre al lado del ícono.
+  ...(escritorio && {
+    tabBarPosition: "left",
+    tabBarVariant: "material",
+    tabBarShowLabel: true,
+    tabBarLabelStyle: { fontSize: 15, fontWeight: "700" },
+    tabBarActiveIndicatorColor: colores.acentoSuave,
+    tabBarStyle: { backgroundColor: colores.blanco, width: ANCHO_BARRA, borderRightWidth: 1, borderRightColor: colores.borde, paddingTop: 24, paddingHorizontal: 8 },
+  }),
 });
+
+// Las pantallas con listas de tarjetas usan más ancho que las de formularios o texto.
+const PESTANAS_ANCHAS = ["Eventos", "Mis eventos"];
+const centrarPestana = ({ route, children }) => (
+  <ContenidoWeb ancho={PESTANAS_ANCHAS.includes(route.name) ? ANCHO_LISTA : ANCHO_PAGINA}>{children}</ContenidoWeb>
+);
+// "Inicio" lleva las pestañas (y la barra lateral): se deja ocupar todo el ancho.
+const centrarPagina = ({ route, children }) =>
+  route.name === "Inicio" ? children : <ContenidoWeb ancho={ANCHO_PAGINA}>{children}</ContenidoWeb>;
+const centrarAcceso = ({ route, children }) =>
+  route.name === "Terminos" ? (
+    <ContenidoWeb ancho={ANCHO_PAGINA}>{children}</ContenidoWeb>
+  ) : (
+    <ContenidoWeb ancho={ANCHO_ACCESO} tarjeta>{children}</ContenidoWeb>
+  );
 
 // Cada rol ve una app distinta: el comprador explora y compra, el organizador gestiona sus eventos.
 function Inicio() {
   const insets = useSafeAreaInsets();
+  const escritorio = useEscritorio();
   const { sesion } = useSesion();
   const { noLeidas } = useNotificaciones();
 
@@ -73,7 +100,7 @@ function Inicio() {
 
   if (sesion.rol === "ORGANIZADOR") {
     return (
-      <Tab.Navigator screenOptions={(p) => opcionesTab(p, insets)}>
+      <Tab.Navigator screenOptions={(p) => opcionesTab(p, insets, escritorio)} screenLayout={centrarPestana}>
         <Tab.Screen name="Mis eventos" component={OrganizadorScreen} />
         <Tab.Screen name="Calendario" component={CalendarioScreen} />
         <Tab.Screen name="Notificaciones" component={NotificacionesScreen} options={opcionesNotificaciones} />
@@ -83,7 +110,7 @@ function Inicio() {
   }
 
   return (
-    <Tab.Navigator screenOptions={(p) => opcionesTab(p, insets)}>
+    <Tab.Navigator screenOptions={(p) => opcionesTab(p, insets, escritorio)} screenLayout={centrarPestana}>
       <Tab.Screen name="Eventos" component={EventosScreen} />
       <Tab.Screen name="Mis compras" component={MisComprasScreen} />
       <Tab.Screen name="Calendario" component={CalendarioScreen} />
@@ -120,9 +147,9 @@ export default function App() {
   return (
     <SafeAreaProvider>
     <SesionContext.Provider value={{ sesion, iniciarSesion, actualizarUsuario, cerrarSesion }}>
-      <NavigationContainer>
+      <NavigationContainer documentTitle={{ formatter: () => "Ticket It" }}>
         {sesion === null ? (
-          <Stack.Navigator screenOptions={{ headerShown: false }}>
+          <Stack.Navigator screenOptions={{ headerShown: false }} screenLayout={centrarAcceso}>
             <Stack.Screen name="Login" component={LoginScreen} />
             <Stack.Screen name="Registro" component={RegistroScreen} />
             <Stack.Screen name="Recuperar" component={RecuperarScreen} />
@@ -131,7 +158,7 @@ export default function App() {
         ) : (
           <EventosProvider esComprador={sesion.rol === "COMPRADOR"}>
           <NotificacionesProvider>
-          <Stack.Navigator screenOptions={opcionesStack}>
+          <Stack.Navigator screenOptions={opcionesStack} screenLayout={centrarPagina}>
             <Stack.Screen name="Inicio" component={Inicio} options={{ headerShown: false }} />
             <Stack.Screen name="Detalle" component={EventoDetalleScreen} options={{ headerShown: false }} />
             <Stack.Screen name="Entradas" component={SeleccionarEntradasScreen} options={{ title: "Seleccionar Entradas" }} />

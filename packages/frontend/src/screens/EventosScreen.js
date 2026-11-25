@@ -3,8 +3,9 @@ import { useEffect, useRef, useState } from "react";
 import { useScrollToTop } from "@react-navigation/native";
 import {
   ActivityIndicator, FlatList, Image, Pressable, ScrollView, StyleSheet,
-  Text, TextInput, useWindowDimensions, View,
+  Text, TextInput, View,
 } from "react-native";
+import { useAnchoContenido, useEscritorio } from "../web";
 import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { get } from "../api";
@@ -33,7 +34,9 @@ export default function EventosScreen({ navigation }) {
   const lista = useRef(null);
   useScrollToTop(lista);
   const insets = useSafeAreaInsets();
-  const { width } = useWindowDimensions();
+  const ancho = useAnchoContenido();
+  const escritorio = useEscritorio();
+  const columnas = escritorio ? 2 : 1; // en la web con pantalla grande las tarjetas van en dos columnas
   // Los eventos, categorías y favoritos vienen del almacén global (se piden una sola vez).
   const { eventos: todos, categorias, favoritos, esFavorito, alternarFavorito, recargar, cargado } = useEventos();
   const [filtrados, setFiltrados] = useState([]);
@@ -47,7 +50,7 @@ export default function EventosScreen({ navigation }) {
   const [error, setError] = useState(null);
 
   // La tarjeta del carrusel deja asomar un pedacito de la siguiente.
-  const anchoTarjeta = width - 32 - 28;
+  const anchoTarjeta = escritorio ? 440 : ancho - 32 - 28;
 
   // Espera un instante después de la última letra antes de buscar, para no pedir al servidor en cada tecla.
   useEffect(() => {
@@ -246,7 +249,10 @@ export default function EventosScreen({ navigation }) {
       {indicador}
       <FlatList
         ref={lista}
+        key={columnas}
         data={eventos}
+        numColumns={columnas}
+        columnWrapperStyle={columnas > 1 ? styles.columnas : undefined}
         {...refreshProps}
         keyExtractor={(evento) => String(evento.id)}
         contentContainerStyle={styles.lista}
@@ -257,7 +263,7 @@ export default function EventosScreen({ navigation }) {
           cargado ? <Text style={styles.centro}>No hay eventos</Text> : <ActivityIndicator style={{ marginTop: 40 }} size="large" color={colores.acento} />
         }
         renderItem={({ item }) => (
-          <View style={styles.cuerpo}>
+          <View style={columnas > 1 ? styles.celda : styles.cuerpo}>
             <TarjetaEvento
               evento={item}
               favorito={esFavorito(item.id)}
@@ -304,6 +310,8 @@ const styles = StyleSheet.create({
   contenedor: { flex: 1, backgroundColor: colores.fondo },
   lista: { paddingBottom: 24 },
   cuerpo: { paddingHorizontal: 16 },
+  columnas: { paddingHorizontal: 8 },
+  celda: { flex: 1, maxWidth: "50%", paddingHorizontal: 8 },
 
   cabecera: {
     backgroundColor: colores.indigo, paddingHorizontal: 16, paddingBottom: 40,

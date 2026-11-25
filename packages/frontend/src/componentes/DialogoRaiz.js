@@ -4,6 +4,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { registrarDialogo } from "../dialogo";
 import { colores, radios } from "../tema";
+import { soloWeb, VENTANA } from "../web";
 
 // Elige el ícono según de qué trata el aviso.
 function iconoDe({ titulo, botones }) {
@@ -77,10 +78,10 @@ export default function DialogoRaiz() {
 }
 
 const styles = StyleSheet.create({
-  fondo: { flex: 1, backgroundColor: "rgba(15,23,42,0.55)", justifyContent: "flex-end" },
+  fondo: { flex: 1, backgroundColor: "rgba(15,23,42,0.55)", justifyContent: "flex-end", ...soloWeb(VENTANA.fondo) },
   hoja: {
     backgroundColor: colores.blanco, borderTopLeftRadius: 28, borderTopRightRadius: 28,
-    paddingHorizontal: 20, paddingTop: 10, alignItems: "center",
+    paddingHorizontal: 20, paddingTop: 10, alignItems: "center", ...soloWeb(VENTANA.hoja),
   },
   agarre: { width: 40, height: 4, borderRadius: 2, backgroundColor: colores.borde, marginBottom: 18 },
   icono: { width: 68, height: 68, borderRadius: 34, alignItems: "center", justifyContent: "center", marginBottom: 14 },
