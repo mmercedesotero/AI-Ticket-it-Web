@@ -3,7 +3,9 @@
   <head>
     <meta charset="utf-8" />
     <meta httpEquiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <!-- viewport-fit=cover: la página ocupa toda la pantalla del iPhone y se pueden respetar la barra de abajo y el notch. -->
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#ffffff" />
     <title>Ticket It</title>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <style id="expo-reset">
@@ -15,11 +17,22 @@
         overflow: hidden;
         margin: 0;
         background: #f4f6fa;
+        overscroll-behavior: none;
+        -webkit-text-size-adjust: 100%;
       }
       #root {
         display: flex;
         height: 100%;
         flex: 1;
+      }
+      /* En el celular, 100% o 100vh incluyen la barra de Safari y tapan la parte de abajo (por ejemplo las pestañas).
+         100dvh es el alto realmente visible, y se ajusta solo cuando la barra aparece o se esconde. */
+      @supports (height: 100dvh) {
+        html,
+        body,
+        #root {
+          height: 100dvh;
+        }
       }
 
       /* Pantalla de carga: se ve mientras el navegador descarga la app (por ejemplo al recargar con F5).
