@@ -13,12 +13,10 @@ export default function MarcoWeb({ children, navigation, titulo, ancho }) {
 
       {titulo ? (
         <View style={[styles.migas, { maxWidth: ancho }]}>
-          {navigation.canGoBack() && (
-            <Pressable onPress={() => navigation.goBack()} style={styles.volver} hitSlop={6}>
-              <Ionicons name="arrow-back" size={18} color={colores.indigo} />
-              <Text style={styles.volverTexto}>Volver</Text>
-            </Pressable>
-          )}
+          <Pressable onPress={() => (navigation.canGoBack() ? navigation.goBack() : navigation.navigate("Inicio"))} style={styles.volver} hitSlop={6}>
+            <Ionicons name="arrow-back" size={18} color={colores.indigo} />
+            <Text style={styles.volverTexto}>Volver</Text>
+          </Pressable>
           <Text style={styles.ruta}>
             <Text onPress={() => navigation.navigate("Inicio")} style={styles.rutaEnlace}>Inicio</Text>
             {"  ›  "}

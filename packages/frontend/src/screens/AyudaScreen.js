@@ -11,7 +11,7 @@ import { useEscritorio } from "../web";
 const CORREO_SOPORTE = "soporte@tickettit.com";
 const sinTildes = (texto) => texto.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
 
-export default function AyudaScreen() {
+export default function AyudaScreen({ navigation }) {
   const insets = useSafeAreaInsets();
   const escritorio = useEscritorio();
   const { sesion } = useSesion();
@@ -44,6 +44,10 @@ export default function AyudaScreen() {
     return (
       <ScrollView style={styles.fondo} contentContainerStyle={{ paddingBottom: 56 }} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
         <View style={styles.heroWeb}>
+          <Pressable style={styles.volverWeb} onPress={() => (navigation.canGoBack() ? navigation.goBack() : navigation.navigate("Inicio"))} hitSlop={8}>
+            <Ionicons name="arrow-back" size={18} color={colores.blanco} />
+            <Text style={styles.volverWebTexto}>Volver</Text>
+          </Pressable>
           <Text style={styles.heroTitulo}>¡Hola, {sesion.usuario.nombre}!{"\n"}¿Cómo podemos ayudarte hoy?</Text>
           <View style={styles.heroBuscador}>
             <TextInput
@@ -267,6 +271,8 @@ const styles = StyleSheet.create({
 
   // Versión web de escritorio
   heroWeb: { backgroundColor: colores.indigo, alignItems: "center", paddingVertical: 52, paddingHorizontal: 24 },
+  volverWeb: { position: "absolute", top: 20, left: 24, flexDirection: "row", alignItems: "center", gap: 6 },
+  volverWebTexto: { color: colores.blanco, fontWeight: "600" },
   heroTitulo: { color: colores.blanco, fontSize: 32, fontWeight: "800", textAlign: "center", lineHeight: 42 },
   heroBuscador: {
     flexDirection: "row", alignItems: "center", gap: 10, width: "100%", maxWidth: 620, height: 50, marginTop: 26,
@@ -282,5 +288,5 @@ const styles = StyleSheet.create({
   categoriaIcono: { width: 48, height: 48, borderRadius: 12, backgroundColor: colores.acentoSuave, alignItems: "center", justifyContent: "center" },
   tituloWeb: { fontSize: 20, fontWeight: "800", color: colores.indigo, marginTop: 34, marginBottom: 14 },
   canalesWeb: { alignItems: "center", marginTop: 30, padding: 26 },
-  botonWeb: { flex: 0, paddingHorizontal: 20 },
+  botonWeb: { flex: 0, flexShrink: 0, minWidth: 290, height: 46, paddingVertical: 0, paddingHorizontal: 22, borderRadius: 10 },
 });

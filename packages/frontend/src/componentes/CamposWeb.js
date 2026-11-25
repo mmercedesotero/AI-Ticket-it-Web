@@ -4,16 +4,19 @@ import { Ionicons } from "@expo/vector-icons";
 import { colores } from "../tema";
 
 // Campos propios del navegador (lista desplegable y fecha). Solo se usan en la versión web.
+// "appearance: none" saca el dibujo que le pone el navegador (el recuadro oscuro), y la flechita la ponemos nosotros.
 const estiloDom = {
-  flex: 1, height: 44, border: "none", background: "transparent", outline: "none",
-  fontSize: 14, fontFamily: "system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif", color: colores.indigo, cursor: "pointer", minWidth: 0,
+  flex: 1, height: 44, border: "none", background: "transparent", outline: "none", boxShadow: "none",
+  WebkitAppearance: "none", MozAppearance: "none", appearance: "none", colorScheme: "light",
+  fontSize: 14, fontFamily: "inherit", color: colores.indigo, cursor: "pointer", minWidth: 0, padding: 0,
 };
 
-function Contenedor({ icono, ancho, children }) {
+function Contenedor({ icono, ancho, flecha, children }) {
   return (
     <View style={[styles.campo, ancho && { width: ancho }]}>
       {icono && <Ionicons name={icono} size={17} color={colores.textoSuave} />}
       {children}
+      {flecha && <Ionicons name="chevron-down" size={16} color={colores.textoSuave} style={styles.flecha} />}
     </View>
   );
 }
@@ -21,7 +24,7 @@ function Contenedor({ icono, ancho, children }) {
 // Lista desplegable. opciones: [{ valor, texto }]
 export function Selector({ valor, onCambio, opciones, icono, ancho }) {
   return (
-    <Contenedor icono={icono} ancho={ancho}>
+    <Contenedor icono={icono} ancho={ancho} flecha>
       {createElement(
         "select",
         { value: valor ?? "", onChange: (e) => onCambio(e.target.value), style: estiloDom },
@@ -47,4 +50,5 @@ const styles = StyleSheet.create({
     flexDirection: "row", alignItems: "center", gap: 8, height: 46, paddingHorizontal: 12,
     backgroundColor: colores.blanco, borderRadius: 10, borderWidth: 1, borderColor: colores.borde,
   },
+  flecha: { pointerEvents: "none" },
 });
