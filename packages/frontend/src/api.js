@@ -6,7 +6,7 @@
 //     export const API = "http://192.168.1.35:3000";
 //
 // El celular y la computadora tienen que estar en la misma wifi. Más detalles en el README.
-export const API = "http://TU-IP-AQUI:3000";
+export const API = "http://localhost:3000";
 
 // Si todavía no se puso la IP, en vez de un error de red confuso se avisa qué hay que hacer.
 const avisarSiFalta = () => {

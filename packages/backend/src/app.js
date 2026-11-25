@@ -1,4 +1,5 @@
 const express = require("express");
+const cors = require("cors");
 const EventoRoutes = require("./routes/eventoRoutes");
 const UsuarioRoutes = require("./routes/UsuarioRoutes");
 const OrganizadorRoutes = require("./routes/OrganizadorRoutes");
@@ -13,6 +14,7 @@ const NotificacionRoutes = require("./routes/NotificacionRoutes");
 const FotoRoutes = require("./routes/FotoRoutes");
 
 const app = express();
+app.use(cors()); // permite que la versión web (otro origen) llame a la API
 app.use(express.json({ limit: "3mb" })); // las fotos de perfil viajan en base64
 
 app.use("/auth", AuthRoutes);
