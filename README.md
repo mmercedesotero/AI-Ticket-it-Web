@@ -196,7 +196,22 @@ Se abre en `http://localhost:8081`. **No hace falta configurar ninguna IP**: la 
 
 La sesión queda guardada en el navegador (recargar la página no cierra la sesión) y las pantallas tienen dirección propia (`/explorar`, `/evento/12`, `/mis-compras`, `/mensajes`...), así que se pueden compartir y funciona el botón "atrás" del navegador.
 
-### Publicarla en Railway
+### Publicarla gratis: web en Vercel + backend en Render
+
+El backend guarda todo en memoria y necesita un servidor que esté siempre encendido, así que **no puede ir a Vercel** (Vercel es "serverless": cada pedido puede caer en una copia distinta y se perderían las cuentas y compras). Por eso se publica en dos partes:
+
+1. **Backend en [Render](https://render.com)** (plan gratuito): crear un **Web Service** desde el repositorio de GitHub. Render lee [`render.yaml`](render.yaml) (carpeta `packages/backend`, `npm install`, `npm start`). Al terminar, copiar la dirección que le da, por ejemplo `https://ai-ticket-it-api.onrender.com`.
+2. **Web en [Vercel](https://vercel.com)**: importar el mismo repositorio. Vercel lee [`vercel.json`](vercel.json) (genera la web y la publica). Antes de desplegar, en **Settings → Environment Variables** agregar:
+
+   ```
+   EXPO_PUBLIC_API_URL = https://ai-ticket-it-api.onrender.com
+   ```
+
+   (la dirección del backend, **sin** barra al final). Si se cambia esta variable, hay que volver a desplegar la web.
+
+Cosas a tener en cuenta del plan gratuito de Render: el servicio se **duerme** tras un rato sin visitas y la primera consulta después tarda cerca de un minuto en despertarlo; y al dormirse o reiniciarse **se pierden las cuentas y compras nuevas** (vuelven los datos de prueba). Para uso real habría que agregar una base de datos.
+
+### Publicarla en Railway (un solo servicio)
 
 El backend publica la web y la API desde el mismo servidor (la API queda también bajo `/api`), así que se publica **un solo servicio**:
 
