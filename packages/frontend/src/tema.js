@@ -1,10 +1,12 @@
+import { esWeb } from "./web";
+
 // Colores y medidas compartidas por todas las pantallas.
 // Para cambiar el look de toda la app alcanza con tocar los valores de acá.
 export const colores = {
   indigo: "#0F172A", // encabezados, navegación, textos fuertes
   acento: "#EF806C", // botones principales y detalles (coral)
   acentoSuave: "#FDEEEA", // fondo de elementos destacados
-  fondo: "#E9EEF5", // fondo de las pantallas (un poco más oscuro que las tarjetas blancas, para que se note su forma)
+  fondo: esWeb ? "#F4F6FA" : "#E9EEF5", // fondo de las pantallas (un poco más oscuro que las tarjetas blancas, para que se note su forma)
   blanco: "#FFFFFF", // tarjetas y campos
   borde: "#E2E8F0",
   textoSuave: "#64748B",

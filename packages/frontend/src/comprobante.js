@@ -7,6 +7,7 @@ import { codigoDe, ESTADOS } from "./compras";
 import { formatearFechaHora, formatearFechaLarga, formatearPrecio } from "./formato";
 import { imagenDe } from "./imagenes";
 import { direccionCompleta } from "./lugar";
+import { esWeb } from "./web";
 
 // Evita que un texto con caracteres raros rompa el HTML del PDF.
 const escapar = (texto) =>
@@ -100,6 +101,14 @@ const ESTILOS = `
 
 // Genera un PDF con un ticket por cada compra y abre el menú del sistema para guardarlo, imprimirlo o compartirlo.
 export async function descargarComprobante(compras) {
+  // En la web el comprobante se abre en una pestaña nueva y se imprime (o se guarda como PDF desde ahí).
+  // La pestaña se abre antes de armar el HTML, si no el navegador la bloquea por no venir del toque.
+  const ventana = esWeb ? window.open("", "_blank") : null;
+  if (esWeb && !ventana) {
+    alerta("No se pudo abrir el comprobante", "El navegador bloqueó la ventana nueva. Permití las ventanas emergentes para este sitio y probá de nuevo.");
+    return;
+  }
+
   try {
     const tickets = (await Promise.all(compras.map(ticketHtml))).join("");
     const html = `
@@ -115,6 +124,14 @@ export async function descargarComprobante(compras) {
         </body>
       </html>`;
 
+    if (ventana) {
+      ventana.document.write(html);
+      ventana.document.close();
+      ventana.focus();
+      setTimeout(() => ventana.print(), 400); // da tiempo a que carguen la foto y el QR
+      return;
+    }
+
     const { uri } = await Print.printToFileAsync({ html });
 
     if (await Sharing.isAvailableAsync()) {
@@ -123,6 +140,7 @@ export async function descargarComprobante(compras) {
       alerta("Comprobante listo", "Se generó el PDF, pero este dispositivo no permite compartirlo.");
     }
   } catch (e) {
+    ventana?.close();
     alerta("No se pudo generar el comprobante", e.message);
   }
 }

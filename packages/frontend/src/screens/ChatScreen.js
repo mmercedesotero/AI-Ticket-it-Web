@@ -9,6 +9,7 @@ import { enviar, get } from "../api";
 import { useSesion } from "../sesion";
 import { colores } from "../tema";
 import { formatearFechaLarga } from "../formato";
+import { useEscritorio } from "../web";
 
 const hora = (iso) => {
   const f = new Date(iso);
@@ -16,7 +17,20 @@ const hora = (iso) => {
 };
 
 export default function ChatScreen({ route, navigation }) {
+  const escritorio = useEscritorio();
   const { compraId } = route.params;
+
+  // En la web de escritorio los chats se ven dentro de la bandeja de Mensajes.
+  useEffect(() => {
+    if (escritorio) navigation.replace("Mensajes", { compraId });
+  }, [escritorio, navigation, compraId]);
+
+  if (escritorio) return null;
+  return <Conversacion compraId={compraId} navigation={navigation} />;
+}
+
+// La conversación de una compra. `incrustado` la usa dentro de la bandeja de mensajes de la web (sin flecha de volver).
+export function Conversacion({ compraId, navigation, incrustado = false }) {
   const { sesion } = useSesion();
   const rol = sesion.rol;
   const insets = useSafeAreaInsets();
@@ -62,10 +76,12 @@ export default function ChatScreen({ route, navigation }) {
       style={styles.contenedor}
       behavior={Platform.OS === "ios" ? "padding" : undefined}
     >
-      <View style={[styles.encabezado, { paddingTop: insets.top + 8 }]}>
-        <Pressable onPress={() => navigation.goBack()} hitSlop={10}>
-          <Ionicons name="arrow-back" size={24} color={colores.indigo} />
-        </Pressable>
+      <View style={[styles.encabezado, { paddingTop: (incrustado ? 0 : insets.top) + 8 }]}>
+        {!incrustado && (
+          <Pressable onPress={() => navigation.goBack()} hitSlop={10}>
+            <Ionicons name="arrow-back" size={24} color={colores.indigo} />
+          </Pressable>
+        )}
         <View style={styles.avatar}>
           <Text style={styles.avatarTexto}>{interlocutor.charAt(0).toUpperCase()}</Text>
         </View>
@@ -114,6 +130,7 @@ export default function ChatScreen({ route, navigation }) {
           placeholderTextColor={colores.textoPlaceholder}
           value={texto}
           onChangeText={setTexto}
+          onSubmitEditing={enviarMensaje}
         />
         <Pressable style={styles.enviar} onPress={enviarMensaje}>
           <Ionicons name="paper-plane" size={18} color={colores.blanco} />

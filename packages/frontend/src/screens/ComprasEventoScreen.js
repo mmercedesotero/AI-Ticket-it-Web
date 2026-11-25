@@ -8,6 +8,7 @@ import { ESTADOS, estiloEstado } from "../compras";
 import Chip from "../componentes/Chip";
 import { colores, radios } from "../tema";
 import { formatearPrecio, yaSeRealizo } from "../formato";
+import Cargando from "../componentes/Cargando";
 
 const sumar = (lista, campo) => lista.reduce((total, x) => total + x[campo], 0);
 
@@ -30,7 +31,7 @@ export default function ComprasEventoScreen({ route, navigation }) {
   );
 
   if (error) return <Text style={styles.centro}>Error: {error}</Text>;
-  if (!datos) return <Text style={styles.centro}>Cargando...</Text>;
+  if (!datos) return <Cargando />;
 
   const vigentes = datos.compras.filter((c) => c.estado !== "CANCELADA" && c.estado !== "REEMBOLSADA");
   const pagadas = datos.compras.filter((c) => c.estado === "CONFIRMADA" || c.estado === "UTILIZADA");

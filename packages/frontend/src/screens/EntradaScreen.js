@@ -13,6 +13,9 @@ import { colores, radios } from "../tema";
 import { formatearFechaHora, formatearFechaLarga, formatearPrecio, tiempoRelativo } from "../formato";
 import { imagenDe } from "../imagenes";
 import { abrirEnMapas, direccionCompleta } from "../lugar";
+import { useEscritorio } from "../web";
+import EntradaWeb from "./EntradaWeb";
+import Cargando from "../componentes/Cargando";
 
 // Qué se muestra en el seguimiento por cada estado por el que pasó la compra.
 const PASOS = {
@@ -28,6 +31,7 @@ export default function EntradaScreen({ route, navigation }) {
   const [compra, setCompra] = useState(null);
   const [qrGrande, setQrGrande] = useState(false);
   const [error, setError] = useState(null);
+  const escritorio = useEscritorio();
 
   const cargar = useCallback(
     () =>
@@ -69,7 +73,7 @@ export default function EntradaScreen({ route, navigation }) {
   };
 
   if (error) return <Text style={styles.centro}>Error: {error}</Text>;
-  if (!compra) return <Text style={styles.centro}>Cargando...</Text>;
+  if (!compra) return <Cargando />;
 
   const estado = ESTADOS[compra.estado];
   const pasada = esPasada(compra);
@@ -86,6 +90,18 @@ export default function EntradaScreen({ route, navigation }) {
   else if (confirmada) siguiente = `Usá tus entradas el ${formatearFechaLarga(compra.evento.fecha)}`;
 
   const dias = confirmada ? Math.round((new Date(`${compra.evento.fecha}T00:00:00`) - new Date().setHours(0, 0, 0, 0)) / 86400000) : null;
+
+  // Web de escritorio: pantalla propia con el evento a la izquierda y la entrada digital a la derecha.
+  if (escritorio) {
+    const linea = historial.map((cambio, i) => ({
+      icono: PASOS[cambio.estado].icono,
+      titulo: PASOS[cambio.estado].titulo,
+      detalle: `${formatearFechaHora(cambio.fechaHora)} · ${tiempoRelativo(cambio.fechaHora)}`,
+      actual: i === historial.length - 1,
+      color: cambio.estado === "CANCELADA" || cambio.estado === "REEMBOLSADA" ? colores.textoSuave : colores.acento,
+    }));
+    return <EntradaWeb compra={compra} linea={linea} siguiente={siguiente} dias={dias} cancelar={cancelar} navigation={navigation} />;
+  }
 
   return (
     <ScrollView style={styles.fondo} contentContainerStyle={styles.contenedor} showsVerticalScrollIndicator={false}>

@@ -1,0 +1,12 @@
+{
+  "name": "ai-ticket-it",
+  "private": true,
+  "description": "AI Ticket It: backend (Express) + frontend (Expo / React Native, web y celular)",
+  "scripts": {
+    "build": "npm install --include=dev --prefix packages/backend && npm install --include=dev --prefix packages/frontend && npm run build:web --prefix packages/frontend",
+    "start": "node packages/backend/server.js"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

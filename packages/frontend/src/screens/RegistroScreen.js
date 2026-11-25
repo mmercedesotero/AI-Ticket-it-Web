@@ -12,7 +12,9 @@ import Avatar from "../componentes/Avatar";
 import Chip from "../componentes/Chip";
 import Logo from "../componentes/Logo";
 import { elegirFoto } from "../foto";
+import AccesoDividido from "../componentes/AccesoDividido";
 import { colores, estilosBase, radios } from "../tema";
+import { soloWeb } from "../web";
 
 const ROLES = [
   { clave: "COMPRADOR", titulo: "Comprador", detalle: "Busco eventos y entradas", icono: "ticket-outline" },
@@ -64,6 +66,7 @@ export default function RegistroScreen({ navigation }) {
   const verTerminos = () => navigation.navigate("Terminos");
 
   return (
+    <AccesoDividido lema="Creá tu cuenta y empezá a vivir experiencias únicas">
     <KeyboardAvoidingView style={styles.fondo} behavior={Platform.OS === "ios" ? "padding" : undefined}>
       <ScrollView
         contentContainerStyle={[styles.contenedor, { paddingTop: insets.top + 12 }]}
@@ -155,6 +158,7 @@ export default function RegistroScreen({ navigation }) {
             autoCapitalize="none"
             value={password}
             onChangeText={setPassword}
+            onSubmitEditing={registrarme}
           />
           <Pressable onPress={() => setVerPassword(!verPassword)} hitSlop={10}>
             <Ionicons name={verPassword ? "eye-outline" : "eye-off-outline"} size={20} color={colores.textoSuave} />
@@ -193,6 +197,7 @@ export default function RegistroScreen({ navigation }) {
         </Text>
       </ScrollView>
     </KeyboardAvoidingView>
+    </AccesoDividido>
   );
 }
 
@@ -205,7 +210,7 @@ const styles = StyleSheet.create({
   },
   fotoAcciones: { flexDirection: "row", gap: 8, marginTop: 10 },
   fondo: { flex: 1, backgroundColor: colores.blanco },
-  contenedor: { paddingHorizontal: 24, paddingBottom: 40 },
+  contenedor: { paddingHorizontal: 24, paddingBottom: 40, ...soloWeb({ width: "100%", maxWidth: 460, alignSelf: "center" }) },
   volver: { alignSelf: "flex-start" },
   logo: { alignItems: "center", marginTop: 4, marginBottom: 22 },
   titulo: { textAlign: "center", fontSize: 28, fontWeight: "800", color: colores.indigo },

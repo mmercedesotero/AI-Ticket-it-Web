@@ -4,6 +4,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { PAISES, separarTelefono } from "../paises";
 import { colores } from "../tema";
+import { soloWeb, VENTANA } from "../web";
 
 // Teléfono con selector de país: la banderita y el código (+54) se eligen aparte
 // y el número se limita a la cantidad de dígitos que tiene ese país.
@@ -87,10 +88,10 @@ const styles = StyleSheet.create({
   numero: { flex: 1, fontSize: 16, color: colores.indigo, paddingVertical: 2, minHeight: 24 },
   contador: { fontSize: 12, color: colores.textoPlaceholder },
 
-  fondo: { flex: 1, backgroundColor: "rgba(15,23,42,0.55)", justifyContent: "flex-end" },
+  fondo: { flex: 1, backgroundColor: "rgba(15,23,42,0.55)", justifyContent: "flex-end", ...soloWeb(VENTANA.fondo) },
   hoja: {
     backgroundColor: colores.blanco, borderTopLeftRadius: 28, borderTopRightRadius: 28,
-    paddingHorizontal: 18, paddingTop: 10, maxHeight: "70%",
+    paddingHorizontal: 18, paddingTop: 10, maxHeight: "70%", ...soloWeb(VENTANA.hoja),
   },
   agarre: { alignSelf: "center", width: 40, height: 4, borderRadius: 2, backgroundColor: colores.borde, marginBottom: 14 },
   titulo: { fontSize: 18, fontWeight: "800", color: colores.indigo, marginBottom: 8, textAlign: "center" },

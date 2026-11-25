@@ -6,6 +6,7 @@ import { get } from "../api";
 import TicketCard from "./TicketCard";
 import { iconoDe } from "./TarjetaEvento";
 import { colores, radios } from "../tema";
+import { soloWeb, VENTANA } from "../web";
 import { formatearFechaLarga, formatearPrecio } from "../formato";
 import { imagenDe } from "../imagenes";
 import { textoLugar } from "../lugar";
@@ -118,10 +119,10 @@ export default function ConfirmarCompraModal({ visible, evento, elegidas, tarjet
 }
 
 const styles = StyleSheet.create({
-  fondo: { flex: 1, backgroundColor: "rgba(15,23,42,0.55)", justifyContent: "flex-end" },
+  fondo: { flex: 1, backgroundColor: "rgba(15,23,42,0.55)", justifyContent: "flex-end", ...soloWeb(VENTANA.fondo) },
   hoja: {
     backgroundColor: colores.blanco, borderTopLeftRadius: 28, borderTopRightRadius: 28,
-    paddingHorizontal: 18, paddingTop: 10, alignItems: "center",
+    paddingHorizontal: 18, paddingTop: 10, alignItems: "center", ...soloWeb(VENTANA.hoja),
   },
   agarre: { width: 40, height: 4, borderRadius: 2, backgroundColor: colores.borde, marginBottom: 16 },
   icono: {

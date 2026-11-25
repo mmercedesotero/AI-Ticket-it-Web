@@ -26,7 +26,7 @@ function mensajeDeArranque(puerto, direcciones = direccionesLocales()) {
   lineas.push(
     "Para usar la app en el celular, abrí packages/frontend/src/api.js y poné esta dirección:",
     "",
-    `    export const API = "http://${principal.ip}:${puerto}";`,
+    `    const API_CELULAR = "http://${principal.ip}:${puerto}";`,
     "",
     `(IP de "${principal.nombre}". El celular y esta computadora tienen que estar en la misma wifi.)`
   );

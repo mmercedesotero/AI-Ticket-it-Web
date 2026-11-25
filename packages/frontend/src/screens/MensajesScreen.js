@@ -10,12 +10,15 @@ import { useRefrescar } from "../refrescar";
 import Avatar from "../componentes/Avatar";
 import { colores, radios } from "../tema";
 import { horaOFecha } from "../formato";
+import { useEscritorio } from "../web";
+import MensajesWeb from "./MensajesWeb";
 
 const CORAL_OSCURO = "#B5503C";
 
 // Todos los chats de la persona (comprador u organizador), el más reciente primero.
-export default function MensajesScreen({ navigation }) {
+export default function MensajesScreen({ navigation, route }) {
   const insets = useSafeAreaInsets();
+  const escritorio = useEscritorio();
   const { sesion } = useSesion();
   const { recargarMensajes } = useNotificaciones();
   const [chats, setChats] = useState(null);
@@ -45,6 +48,8 @@ export default function MensajesScreen({ navigation }) {
   }, [navigation]);
 
   const sinLeer = (chats ?? []).filter((c) => c.noLeidos > 0).length;
+
+  if (escritorio) return <MensajesWeb chats={chats} rol={sesion.rol} navigation={navigation} inicial={route?.params?.compraId} />;
 
   return (
     <View style={styles.fondo}>

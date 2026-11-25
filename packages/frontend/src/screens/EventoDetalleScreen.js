@@ -15,9 +15,13 @@ import { formatearFechaLarga, formatearPrecio, yaSeRealizo } from "../formato";
 import { imagenDe } from "../imagenes";
 import Chip from "../componentes/Chip";
 import { abrirEnMapas, ciudadYPais } from "../lugar";
+import { useEscritorio } from "../web";
+import EventoDetalleWeb from "./EventoDetalleWeb";
+import Cargando from "../componentes/Cargando";
 
 export default function EventoDetalleScreen({ route, navigation }) {
   const { id } = route.params;
+  const escritorio = useEscritorio();
   const insets = useSafeAreaInsets();
   const { eventos, esFavorito, alternarFavorito } = useEventos();
   // Arranca con el evento del almacén global, así la pantalla abre al instante.
@@ -60,7 +64,16 @@ export default function EventoDetalleScreen({ route, navigation }) {
   };
 
   if (error) return <Text style={styles.centro}>Error: {error}</Text>;
-  if (!evento) return <Text style={styles.centro}>Cargando...</Text>;
+  if (!evento) return <Cargando />;
+
+  if (escritorio) {
+    return (
+      <EventoDetalleWeb
+        evento={evento} organizador={organizador} navigation={navigation} chatear={chatear}
+        esFavorito={esFavorito(evento.id)} alternarFavorito={() => alternarFavorito(evento)}
+      />
+    );
+  }
 
   const foto = imagenDe(evento);
   const finalizado = yaSeRealizo(evento.fecha);

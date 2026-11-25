@@ -11,6 +11,7 @@ import Chip from "../componentes/Chip";
 import Segmentos from "../componentes/Segmentos";
 import { colores, radios } from "../tema";
 import { formatearFechaHora, tiempoRelativo } from "../formato";
+import { useEscritorio } from "../web";
 
 // Ícono y color de cada tipo de aviso.
 const TIPOS = {
@@ -85,6 +86,7 @@ function agrupar(lista) {
 
 export default function NotificacionesScreen({ navigation }) {
   const insets = useSafeAreaInsets();
+  const escritorio = useEscritorio();
   const lista = useRef(null);
   useScrollToTop(lista);
   const { sesion } = useSesion();
@@ -119,7 +121,7 @@ export default function NotificacionesScreen({ navigation }) {
 
   return (
     <View style={styles.contenedor}>
-      <CabeceraPantalla titulo="Notificaciones" />
+      {!escritorio && <CabeceraPantalla titulo="Notificaciones" />}
       {indicador}
 
       <SectionList
@@ -132,8 +134,14 @@ export default function NotificacionesScreen({ navigation }) {
         showsVerticalScrollIndicator={false}
         ListHeaderComponent={
           <View style={styles.encabezado}>
+            {escritorio && (
+              <View>
+                <Text style={styles.tituloWeb}>Notificaciones</Text>
+                <Text style={styles.subtituloWeb}>{noLeidas > 0 ? `Tenés ${noLeidas} sin leer` : "Estás al día"}</Text>
+              </View>
+            )}
             <View style={styles.resumenFila}>
-              <Text style={styles.resumen}>{noLeidas > 0 ? `Tenés ${noLeidas} sin leer` : "Estás al día"}</Text>
+              {!escritorio && <Text style={styles.resumen}>{noLeidas > 0 ? `Tenés ${noLeidas} sin leer` : "Estás al día"}</Text>}
               {noLeidas > 0 && <Chip etiqueta="Marcar todas como leídas" icono="checkmark-done" onPress={marcarTodasLeidas} />}
             </View>
             <Segmentos opciones={opciones} valor={pestania} onCambiar={setPestania} />
@@ -192,6 +200,8 @@ const styles = StyleSheet.create({
   encabezado: { gap: 12, marginBottom: 4 },
   resumenFila: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", minHeight: 32 },
   resumen: { color: colores.textoSuave, fontWeight: "600" },
+  tituloWeb: { fontSize: 28, fontWeight: "800", color: colores.indigo },
+  subtituloWeb: { color: colores.textoSuave, marginTop: 2 },
 
   grupo: {
     fontSize: 12, fontWeight: "700", letterSpacing: 0.6, color: colores.textoSuave,

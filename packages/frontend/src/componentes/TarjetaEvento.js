@@ -92,6 +92,8 @@ export default function TarjetaEvento({ evento, favorito, onPress, onFavorito })
           </View>
         )}
 
+        {/* En la web las tarjetas de una misma fila miden lo mismo: este espacio empuja el precio al fondo. */}
+        <View style={styles.relleno} />
         <View style={styles.pie}>
           <View style={styles.precioBloque}>
             <Text style={styles.precioEtiqueta}>Entradas</Text>
@@ -109,8 +111,9 @@ export default function TarjetaEvento({ evento, favorito, onPress, onFavorito })
 const styles = StyleSheet.create({
   tarjeta: {
     backgroundColor: colores.blanco, borderRadius: radios.tarjeta, overflow: "hidden",
-    marginBottom: 16, borderWidth: 1, borderColor: colores.borde,
+    marginBottom: 16, borderWidth: 1, borderColor: colores.borde, flexGrow: 1,
   },
+  relleno: { flexGrow: 1, minHeight: 14 },
   imagen: {
     width: "100%", aspectRatio: 16 / 9, backgroundColor: colores.indigo,
     alignItems: "center", justifyContent: "center",
@@ -142,14 +145,14 @@ const styles = StyleSheet.create({
   },
   etiquetaFinalizadoTexto: { fontSize: 12, fontWeight: "700", color: colores.blanco },
 
-  cuerpo: { padding: 14 },
+  cuerpo: { padding: 14, flexGrow: 1 },
   nombre: { fontSize: 20, fontWeight: "800", color: colores.indigo, marginBottom: 8 },
   linea: { flexDirection: "row", alignItems: "center", gap: 8, marginTop: 4 },
   lineaTexto: { color: colores.textoSuave, fontSize: 14, flexShrink: 1 },
 
   pie: {
     flexDirection: "row", alignItems: "center", justifyContent: "space-between",
-    marginTop: 14, paddingTop: 12, borderTopWidth: 1, borderColor: colores.borde,
+    paddingTop: 12, borderTopWidth: 1, borderColor: colores.borde,
   },
   precioBloque: { flex: 1 },
   precioEtiqueta: { fontSize: 12, color: colores.textoSuave },
